@@ -1,0 +1,569 @@
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  Ban, Bath, BedDouble, Calculator, Car, ChevronDown, ChevronRight, Clock, Eye, Flag, MapPin, MessageCircle, Phone, PhoneCall,
+  Ruler, Share2, TrendingUp, LandPlot, Check,
+} from 'lucide-react'
+import type { Listing } from '../types'
+import { categoryBySlug } from '../data/categories'
+import { cityBySlug, cityName } from '../data/locations'
+import { sellerById } from '../data/sellers'
+import { useStore } from '../lib/store'
+import { maskPhone, naira, nairaCompact, timeAgo, unitLabel, yearsOn } from '../lib/format'
+import { Gallery } from '../components/Gallery'
+import { ListingCard } from '../components/ListingCard'
+import { Avatar, Breadcrumbs, Modal, SafetyTips, SaveButton, Stars, TierTag, VerifiedBadge, typeIcon } from '../components/ui'
+import NotFound from './NotFound'
+
+export default function ListingDetail() {
+  const { id } = useParams()
+  const { byId } = useStore()
+  const l = byId(id)
+  return l ? <Detail key={l.id} l={l} /> : <NotFound />
+}
+
+function Detail({ l }: { l: Listing }) {
+  const { listings, addRecent, recent, byId, openThread, user, toast } = useStore()
+  const navigate = useNavigate()
+  const cat = categoryBySlug(l.category)!
+  const seller = l.isUserAd
+    ? { id: 'me', name: user?.name ?? 'You', type: 'Owner' as const, verified: false, enterprise: false, joinedYear: new Date().getFullYear(), rating: 0, reviews: 0, responseTime: 'Replies within a day', phone: user?.phone ?? '', color: 'var(--accent)', city: l.city, bio: '' }
+    : sellerById(l.sellerId)!
+  const [showPhone, setShowPhone] = useState(false)
+  const [descOpen, setDescOpen] = useState(false)
+  const [moreAttrs, setMoreAttrs] = useState(false)
+  const [modal, setModal] = useState<null | 'callback' | 'report' | 'unavailable'>(null)
+  const unit = unitLabel(l.priceUnit, l.category)
+  const longDesc = l.description.length > 420 || l.description.split('\n').length > 9
+
+  useEffect(() => {
+    addRecent(l.id)
+    document.title = `${l.title} — ${naira(l.price)} | House4Rent.ng`
+    return () => {
+      document.title = 'House4Rent.ng — Property for rent & sale in Nigeria'
+    }
+  }, [l.id, l.title, l.price, addRecent])
+
+  const similar = useMemo(
+    () =>
+      listings
+        .filter((x) => x.id !== l.id && x.status === 'active' && x.category === l.category && x.city === l.city)
+        .sort((a, b) => Math.abs(Math.log(a.price / l.price)) - Math.abs(Math.log(b.price / l.price)))
+        .slice(0, 8),
+    [listings, l],
+  )
+  const recentItems = recent.filter((r) => r !== l.id).map((r) => byId(r)).filter(Boolean).slice(0, 4) as Listing[]
+
+  const keyFacts = [
+    { icon: typeIcon(l.propertyType), label: l.propertyType },
+    l.bedrooms ? { icon: BedDouble, label: `${l.bedrooms} bedroom${l.bedrooms > 1 ? 's' : ''}` } : null,
+    l.bathrooms ? { icon: Bath, label: `${l.bathrooms} bathroom${l.bathrooms > 1 ? 's' : ''}` } : null,
+    l.plots ? { icon: LandPlot, label: `${l.plots} plot${l.plots > 1 ? 's' : ''}` } : null,
+    l.sizeSqm ? { icon: Ruler, label: `${l.sizeSqm.toLocaleString()} sqm` } : null,
+    l.parking ? { icon: Car, label: `${l.parking} parking` } : null,
+  ].filter(Boolean) as { icon: typeof Car; label: string }[]
+
+  const attrs: [string, string | number | undefined][] = [
+    ['Property address', l.address],
+    ['Estate', l.estate],
+    ['Condition', l.condition],
+    ['Furnishing', l.furnishing],
+    ['Toilets', l.toilets],
+    ['Parking spaces', l.parking],
+    ['Size', l.sizeSqm ? `${l.sizeSqm.toLocaleString()} sqm` : undefined],
+    ['Number of plots', l.plots],
+    ['Title document', l.document],
+    ['Agency fee', l.agentFee ? `${l.agentFee}%` : undefined],
+    ['Caution / deposit', l.cautionFee ? naira(l.cautionFee) : undefined],
+    ['Service charge', l.serviceCharge ? `${naira(l.serviceCharge)} / yr` : undefined],
+  ]
+  const shownAttrs = attrs.filter(([, v]) => v !== undefined && v !== '')
+  const visibleAttrs = moreAttrs ? shownAttrs : shownAttrs.slice(0, 6)
+
+  const startChat = () => {
+    const tid = openThread(l.id, seller.id)
+    navigate(`/messages/${tid}`)
+  }
+  const share = async () => {
+    try {
+      if (navigator.share) await navigator.share({ title: l.title, url: location.href })
+      else {
+        await navigator.clipboard.writeText(location.href)
+        toast('Link copied to clipboard')
+      }
+    } catch {
+      /* user cancelled */
+    }
+  }
+  const city = cityBySlug(l.city)
+  const mapBox = `${l.lng - 0.012},${l.lat - 0.008},${l.lng + 0.012},${l.lat + 0.008}`
+
+  return (
+    <div className="container page-detail">
+      <Breadcrumbs
+        items={[
+          { label: 'All ads', to: '/nigeria/real-estate' },
+          { label: 'Property', to: `/${l.city}/real-estate` },
+          { label: cat.name, to: `/${l.city}/${l.category}` },
+          { label: l.propertyType, to: `/${l.city}/${l.category}?type=${encodeURIComponent(l.propertyType)}` },
+          { label: l.title },
+        ]}
+      />
+
+      <div className="detail-layout">
+        <div className="detail-main">
+          <Gallery images={l.images} title={l.title} />
+
+          <section className="card detail-info">
+            <div className="detail-meta">
+              <TierTag tier={l.tier} />
+              <span>
+                <MapPin size={14} /> {city?.state}, {cityName(l.city)}, {l.area}
+              </span>
+              <span>
+                <Clock size={14} /> {timeAgo(l.postedAt)}
+              </span>
+              <span className="push">
+                <Eye size={14} /> {l.views.toLocaleString()} views
+              </span>
+            </div>
+            <div className="detail-title-row">
+              <h1>{l.title}</h1>
+              <SaveButton id={l.id} variant="inline" />
+            </div>
+            {l.status === 'unavailable' && <div className="notice warn">This advert is marked as no longer available.</div>}
+
+            <div className="key-facts">
+              {keyFacts.map(({ icon: Icon, label }) => (
+                <div key={label} className="key-fact">
+                  <span>
+                    <Icon size={22} strokeWidth={1.6} />
+                  </span>
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            {shownAttrs.length > 0 && (
+              <>
+                <dl className="attr-grid">
+                  {visibleAttrs.map(([k, v]) => (
+                    <div key={k}>
+                      <dd>{v}</dd>
+                      <dt>{k}</dt>
+                    </div>
+                  ))}
+                </dl>
+                {shownAttrs.length > 6 && (
+                  <button className="link-btn right" onClick={() => setMoreAttrs((v) => !v)}>
+                    {moreAttrs ? 'Show less' : 'Show more'} <ChevronDown size={15} className={moreAttrs ? 'flip' : ''} />
+                  </button>
+                )}
+              </>
+            )}
+
+            <div className={`description ${longDesc && !descOpen ? 'clamped' : ''}`}>
+              <p>{l.description}</p>
+            </div>
+            {longDesc && (
+              <button className="link-btn" onClick={() => setDescOpen((v) => !v)}>
+                {descOpen ? 'Show less' : 'Read full description'}
+              </button>
+            )}
+
+            {l.facilities.length > 0 && (
+              <>
+                <h3 className="sub-h">{cat.group === 'land' ? 'Land features' : 'Facilities'}</h3>
+                <ul className="facility-list">
+                  {l.facilities.map((x) => (
+                    <li key={x}>
+                      <Check size={15} /> {x}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            <div className="detail-actions">
+              <ContactButton phone={seller.phone} shown={showPhone} onShow={() => setShowPhone(true)} />
+              <button className="btn btn-outline" onClick={share}>
+                <Share2 size={16} /> Share
+              </button>
+            </div>
+          </section>
+
+          <CostCalculator l={l} />
+
+          <section className="card map-card">
+            <h3 className="sub-h">
+              <MapPin size={18} /> Location
+            </h3>
+            <p className="muted">
+              {l.address ?? l.area}, {cityName(l.city)} — approximate location. Confirm the exact address with the seller before inspection.
+            </p>
+            <iframe
+              title="Map"
+              loading="lazy"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBox}&layer=mapnik&marker=${l.lat},${l.lng}`}
+            />
+          </section>
+        </div>
+
+        <aside className="detail-side">
+          <section className="card price-card">
+            <div className="price-big">
+              {naira(l.price)} {unit && <small>{unit}</small>}
+            </div>
+            {l.negotiable && <span className="tag">Negotiable</span>}
+            <button className="btn btn-outline-brand block" onClick={() => setModal('callback')}>
+              <PhoneCall size={16} /> Request call back
+            </button>
+          </section>
+
+          <Link
+            to={`/price-check?city=${l.city}&category=${l.category}&type=${encodeURIComponent(l.propertyType)}${l.bedrooms ? `&beds=${l.bedrooms}` : ''}`}
+            className="card price-check-link"
+          >
+            <TrendingUp size={20} />
+            <span>
+              Check average price of {l.bedrooms ? `${l.bedrooms} bedroom ` : ''}
+              {l.propertyType.toLowerCase()} in <strong>{cityName(l.city)}</strong>
+            </span>
+            <ChevronRight size={18} />
+          </Link>
+
+          <section className="card seller-card">
+            <div className="seller-head">
+              <Avatar name={seller.name} color={seller.color} size={56} />
+              <div>
+                {l.isUserAd ? (
+                  <strong>{seller.name}</strong>
+                ) : (
+                  <Link to={`/seller/${seller.id}`} className="seller-name">
+                    {seller.name}
+                  </Link>
+                )}
+                <div className="seller-sub">
+                  <VerifiedBadge seller={seller} />
+                  <span>{yearsOn(seller.joinedYear)}</span>
+                </div>
+                {seller.reviews > 0 && (
+                  <div className="seller-rating">
+                    <Stars value={seller.rating} /> {seller.rating.toFixed(1)} · {seller.reviews} reviews
+                  </div>
+                )}
+                <small className="muted">{seller.responseTime}</small>
+              </div>
+            </div>
+            {l.isUserAd ? (
+              <Link to="/my-ads" className="btn btn-primary block">
+                Manage this advert
+              </Link>
+            ) : (
+              <>
+                <ContactButton phone={seller.phone} shown={showPhone} onShow={() => setShowPhone(true)} block />
+                <button className="btn btn-outline-brand block" onClick={startChat}>
+                  <MessageCircle size={16} /> Start chat
+                </button>
+              </>
+            )}
+          </section>
+
+          {!l.isUserAd && (
+            <section className="card side-links">
+              <button className="link-btn" onClick={() => setModal('unavailable')}>
+                <Ban size={15} /> Mark unavailable
+              </button>
+              <button className="link-btn danger" onClick={() => setModal('report')}>
+                <Flag size={15} /> Report abuse
+              </button>
+            </section>
+          )}
+
+          <SafetyTips />
+
+          <Link to={`/sell?category=${l.category}`} className="btn btn-outline-brand block">
+            Post ad like this
+          </Link>
+        </aside>
+      </div>
+
+      {similar.length > 0 && (
+        <section className="block">
+          <div className="block-head">
+            <h2>Similar adverts</h2>
+            <Link to={`/${l.city}/${l.category}`} className="see-all">
+              See all <ChevronRight size={16} />
+            </Link>
+          </div>
+          <div className="card-grid four">
+            {similar.map((x) => (
+              <ListingCard key={x.id} l={x} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {recentItems.length > 0 && (
+        <section className="block">
+          <div className="block-head">
+            <h2>Recently viewed</h2>
+          </div>
+          <div className="card-grid four">
+            {recentItems.map((x) => (
+              <ListingCard key={x.id} l={x} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!l.isUserAd && (
+        <div className="mobile-cta">
+          <a className="btn btn-outline-brand" href={`tel:${seller.phone.replace(/\s/g, '')}`}>
+            <Phone size={16} /> Call
+          </a>
+          <button className="btn btn-primary" onClick={startChat}>
+            <MessageCircle size={16} /> Chat
+          </button>
+        </div>
+      )}
+
+      <CallbackModal open={modal === 'callback'} onClose={() => setModal(null)} sellerName={seller.name} />
+      <ReportModal open={modal === 'report'} onClose={() => setModal(null)} />
+      <Modal open={modal === 'unavailable'} onClose={() => setModal(null)} title="Mark as unavailable?">
+        <p>Tell us this property has already been rented or sold. We'll confirm with the seller and hide it if it's no longer available.</p>
+        <div className="modal-actions">
+          <button className="btn btn-ghost" onClick={() => setModal(null)}>
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setModal(null)
+              toast('Thanks! We will check with the seller.')
+            }}
+          >
+            Yes, it's unavailable
+          </button>
+        </div>
+      </Modal>
+    </div>
+  )
+}
+
+function ContactButton({ phone, shown, onShow, block }: { phone: string; shown: boolean; onShow: () => void; block?: boolean }) {
+  if (shown)
+    return (
+      <a className={`btn btn-primary ${block ? 'block' : ''}`} href={`tel:${phone.replace(/\s/g, '')}`}>
+        <Phone size={16} /> {phone}
+      </a>
+    )
+  return (
+    <button className={`btn btn-primary ${block ? 'block' : ''}`} onClick={onShow}>
+      <Phone size={16} /> Show contact <span className="phone-mask">{maskPhone(phone)}</span>
+    </button>
+  )
+}
+
+function CostCalculator({ l }: { l: Listing }) {
+  const cat = categoryBySlug(l.category)!
+  const [deposit, setDeposit] = useState(30)
+  const [rate, setRate] = useState(18)
+  const [years, setYears] = useState(15)
+  const [nights, setNights] = useState(3)
+  const [plots, setPlots] = useState(l.plots ?? 1)
+
+  if (l.priceUnit === 'per day') {
+    const sub = l.price * nights
+    return (
+      <section className="card calc">
+        <h3 className="sub-h">
+          <Calculator size={18} /> Booking estimate
+        </h3>
+        <label className="calc-row">
+          <span>{cat.group === 'venue' ? 'Days' : 'Nights'}</span>
+          <input type="number" min={1} max={60} value={nights} onChange={(e) => setNights(Math.max(1, Number(e.target.value) || 1))} />
+        </label>
+        <Rows rows={[[`${naira(l.price)} × ${nights}`, sub], ['Refundable caution', l.cautionFee ?? 0]]} total={sub + (l.cautionFee ?? 0)} totalLabel="Pay on check-in" />
+      </section>
+    )
+  }
+
+  if (l.priceUnit === 'per annum' || l.priceUnit === 'per month') {
+    const rent = l.priceUnit === 'per month' ? l.price * 12 : l.price
+    const agency = (rent * (l.agentFee ?? 0)) / 100
+    const legal = l.agentFee ? rent * 0.1 : 0
+    const rows: [string, number][] = [
+      ['First year rent', rent],
+      [`Agency fee (${l.agentFee ?? 0}%)`, agency],
+      ['Legal / agreement (10%)', legal],
+      ['Caution deposit', l.cautionFee ?? 0],
+      ['Service charge', l.serviceCharge ?? 0],
+    ]
+    return (
+      <section className="card calc">
+        <h3 className="sub-h">
+          <Calculator size={18} /> Move-in cost estimate
+        </h3>
+        <Rows rows={rows.filter(([, v]) => v > 0)} total={rows.reduce((s, [, v]) => s + v, 0)} totalLabel="Estimated total to move in" />
+        <p className="muted small">Fees vary by agent. Always get a written breakdown before you pay.</p>
+      </section>
+    )
+  }
+
+  if (l.priceUnit === 'per plot') {
+    const sub = l.price * plots
+    const agency = (sub * (l.agentFee ?? 0)) / 100
+    return (
+      <section className="card calc">
+        <h3 className="sub-h">
+          <Calculator size={18} /> Land cost estimate
+        </h3>
+        <label className="calc-row">
+          <span>Plots</span>
+          <input type="number" min={1} max={l.plots ?? 50} value={plots} onChange={(e) => setPlots(Math.min(l.plots ?? 50, Math.max(1, Number(e.target.value) || 1)))} />
+        </label>
+        <Rows rows={[[`${naira(l.price)} × ${plots} plot${plots > 1 ? 's' : ''}`, sub], ...(agency ? ([[`Agency (${l.agentFee}%)`, agency]] as [string, number][]) : [])]} total={sub + agency} totalLabel="Estimated total" />
+        <p className="muted small">Survey, documentation and development levies are usually extra.</p>
+      </section>
+    )
+  }
+
+  // Outright sale → mortgage estimate.
+  const principal = l.price * (1 - deposit / 100)
+  const r = rate / 100 / 12
+  const n = years * 12
+  const monthly = r === 0 ? principal / n : (principal * r) / (1 - Math.pow(1 + r, -n))
+  return (
+    <section className="card calc">
+      <h3 className="sub-h">
+        <Calculator size={18} /> Mortgage estimate
+      </h3>
+      <div className="calc-sliders">
+        <label>
+          <span>
+            Down payment <strong>{deposit}% · {nairaCompact((l.price * deposit) / 100)}</strong>
+          </span>
+          <input type="range" min={10} max={90} step={5} value={deposit} onChange={(e) => setDeposit(Number(e.target.value))} />
+        </label>
+        <label>
+          <span>
+            Interest rate <strong>{rate}% p.a.</strong>
+          </span>
+          <input type="range" min={6} max={30} step={0.5} value={rate} onChange={(e) => setRate(Number(e.target.value))} />
+        </label>
+        <label>
+          <span>
+            Tenure <strong>{years} years</strong>
+          </span>
+          <input type="range" min={1} max={30} value={years} onChange={(e) => setYears(Number(e.target.value))} />
+        </label>
+      </div>
+      <div className="calc-result">
+        <span>Monthly repayment</span>
+        <strong>{naira(monthly)}</strong>
+        <small className="muted">
+          Loan {naira(principal)} · total interest {nairaCompact(monthly * n - principal)}
+        </small>
+      </div>
+      <p className="muted small">Indicative only. NHF loans start around 6%; commercial mortgages are typically higher.</p>
+    </section>
+  )
+}
+
+function Rows({ rows, total, totalLabel }: { rows: [string, number][]; total: number; totalLabel: string }) {
+  return (
+    <dl className="calc-rows">
+      {rows.map(([k, v]) => (
+        <div key={k}>
+          <dt>{k}</dt>
+          <dd>{naira(v)}</dd>
+        </div>
+      ))}
+      <div className="total">
+        <dt>{totalLabel}</dt>
+        <dd>{naira(total)}</dd>
+      </div>
+    </dl>
+  )
+}
+
+function CallbackModal({ open, onClose, sellerName }: { open: boolean; onClose: () => void; sellerName: string }) {
+  const { user, toast } = useStore()
+  const [name, setName] = useState(user?.name ?? '')
+  const [phone, setPhone] = useState(user?.phone ?? '')
+  const [when, setWhen] = useState('Anytime')
+  const valid = name.trim().length > 1 && phone.replace(/\D/g, '').length >= 10
+  return (
+    <Modal open={open} onClose={onClose} title="Request a call back">
+      <form
+        className="form"
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (!valid) return
+          onClose()
+          toast(`Request sent — ${sellerName} will call you back`)
+        }}
+      >
+        <label>
+          Your name
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+        </label>
+        <label>
+          Phone number
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="0803 000 0000" required />
+        </label>
+        <label>
+          Best time to call
+          <select value={when} onChange={(e) => setWhen(e.target.value)}>
+            <option>Anytime</option>
+            <option>Morning (8am – 12pm)</option>
+            <option>Afternoon (12pm – 4pm)</option>
+            <option>Evening (4pm – 8pm)</option>
+          </select>
+        </label>
+        <button className="btn btn-primary block" disabled={!valid}>
+          Send request
+        </button>
+      </form>
+    </Modal>
+  )
+}
+
+const REPORT_REASONS = ['Scam or fraud', 'Already rented / sold', 'Wrong price', 'Wrong category or location', 'Fake photos', 'Duplicate advert', 'Other']
+
+function ReportModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { toast } = useStore()
+  const [reason, setReason] = useState('')
+  const [note, setNote] = useState('')
+  return (
+    <Modal open={open} onClose={onClose} title="Report this advert">
+      <form
+        className="form"
+        onSubmit={(e) => {
+          e.preventDefault()
+          onClose()
+          setReason('')
+          setNote('')
+          toast('Report received. Our team will review it within 24 hours.')
+        }}
+      >
+        <div className="radio-stack">
+          {REPORT_REASONS.map((r) => (
+            <label key={r} className="radio-row">
+              <input type="radio" name="reason" value={r} checked={reason === r} onChange={() => setReason(r)} />
+              {r}
+            </label>
+          ))}
+        </div>
+        <label>
+          Details (optional)
+          <textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Tell us what happened" />
+        </label>
+        <button className="btn btn-danger block" disabled={!reason}>
+          Send report
+        </button>
+      </form>
+    </Modal>
+  )
+}
