@@ -52,22 +52,40 @@ export function Header() {
     navigate(`${target}?${next.toString()}`)
   }
 
+  // On narrow screens the search box lives in its own row (or the hero on the home page).
+  const isHome = pathname === '/'
+  // Chat and forms are focused tasks — they skip the search row.
+  const showSubbar = !isHome && !['/messages', '/sell', '/login', '/register'].some((p) => pathname.startsWith(p))
+  const focusSearch = () => {
+    if (!isHome && !showSubbar) {
+      navigate(`/${ALL_CITIES}/${ALL_CATEGORIES}`)
+      setTimeout(() => document.querySelector<HTMLInputElement>('.sub-search input')?.focus(), 350)
+      return
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setTimeout(() => document.querySelector<HTMLInputElement>(isHome ? '.hs-q input' : '.sub-search input')?.focus(), 300)
+  }
+  const placeholder = `Search in ${cat ? cat.short : 'Property'}`
+
   return (
     <>
       <header className="topbar">
         <div className="container topbar-inner">
-          <button className="icon-btn on-brand" onClick={() => setDrawer(true)} aria-label="Open menu">
+          <button className="icon-btn" onClick={() => setDrawer(true)} aria-label="Open menu">
             <Menu size={24} />
           </button>
           <Logo />
           <form className="top-search" onSubmit={submit} role="search">
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search in ${cat ? cat.short : 'Property'}`} aria-label="Search properties" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={placeholder} aria-label="Search properties" />
             <button type="submit" aria-label="Search">
               <Search size={18} />
             </button>
           </form>
           <nav className="top-actions">
-            <NavLink to="/saved" className="top-icon" aria-label="Saved adverts" title="Saved adverts">
+            <button className="top-icon search-toggle" onClick={focusSearch} aria-label="Search">
+              <Search size={20} />
+            </button>
+            <NavLink to="/saved" className="top-icon saved-link" aria-label="Saved adverts" title="Saved adverts">
               <Heart size={20} />
               {saved.length > 0 && <span className="dot-count">{saved.length}</span>}
             </NavLink>
@@ -96,29 +114,50 @@ export function Header() {
                 )}
               </div>
             ) : (
-              <span className="auth-links hide-sm">
-                <Link to="/login">Sign in</Link>
-                <span aria-hidden>|</span>
-                <Link to="/register">Registration</Link>
-              </span>
+              <Link to="/login" className="auth-link hide-sm">
+                Sign in
+              </Link>
             )}
             <Link to="/sell" className="btn btn-accent sell-btn">
-              <Plus size={18} className="show-sm" />
-              <span className="hide-sm">SELL</span>
+              <Plus size={18} />
+              <span className="hide-sm">Post ad</span>
             </Link>
           </nav>
         </div>
       </header>
 
+      {showSubbar && (
+        <div className="subbar container">
+          <form className="sub-search" onSubmit={submit} role="search">
+            <Search size={18} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={placeholder} aria-label="Search properties" enterKeyHint="search" />
+            {q && (
+              <button type="button" onClick={() => setQ('')} aria-label="Clear search">
+                <X size={16} />
+              </button>
+            )}
+          </form>
+        </div>
+      )}
+
       <div className={`drawer-backdrop ${drawer ? 'open' : ''}`} onClick={() => setDrawer(false)} />
       <aside className={`drawer ${drawer ? 'open' : ''}`} aria-hidden={!drawer}>
         <div className="drawer-head">
           <Logo />
-          <button className="icon-btn on-brand" onClick={() => setDrawer(false)} aria-label="Close menu">
+          <button className="icon-btn" onClick={() => setDrawer(false)} aria-label="Close menu">
             <X size={22} />
           </button>
         </div>
         <div className="drawer-body">
+          {user && (
+            <div className="drawer-user">
+              <Avatar name={user.name} color="var(--accent)" size={44} />
+              <div>
+                <strong>{user.name}</strong>
+                <small>{user.phone}</small>
+              </div>
+            </div>
+          )}
           {!user && (
             <div className="drawer-auth">
               <Link to="/login" className="btn btn-outline">Sign in</Link>
@@ -145,11 +184,23 @@ export function Header() {
               </Link>
             ))}
           </div>
-          <p className="drawer-label">More</p>
+          <p className="drawer-label">Your account</p>
+          <Link to="/saved" className="drawer-link">
+            <Heart size={18} /> Saved adverts {saved.length > 0 && <span className="drawer-count">{saved.length}</span>}
+          </Link>
+          <Link to="/messages" className="drawer-link">
+            <MessageCircle size={18} /> Messages {unread > 0 && <span className="drawer-count">{unread}</span>}
+          </Link>
+          <Link to="/my-ads" className="drawer-link"><User size={18} /> My adverts</Link>
+          <p className="drawer-label">Tools</p>
           <Link to="/agents" className="drawer-link"><Award size={18} /> Trusted agents</Link>
           <Link to="/price-check" className="drawer-link"><TrendingUp size={18} /> Price check</Link>
-          <Link to="/my-ads" className="drawer-link"><User size={18} /> My adverts</Link>
           <Link to="/sell" className="btn btn-accent block mt">Post a property</Link>
+          {user && (
+            <button className="btn btn-ghost block mt" onClick={logout}>
+              <LogOut size={17} /> Log out
+            </button>
+          )}
         </div>
       </aside>
     </>

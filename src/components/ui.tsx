@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  BadgeCheck, Briefcase, Building, Building2, Castle, CheckCircle2, ChevronRight, Crown, DoorClosed, DoorOpen, Fence, Fuel,
+  BadgeCheck, Briefcase, Building, Building2, Castle, CheckCircle2, ChevronDown, ChevronRight, Crown, DoorClosed, DoorOpen, Fence, Fuel,
   HardHat, Heart, Home, Hotel, House, Info, KeyRound, LandPlot, Laptop, Layers, PartyPopper, Presentation, School, ShieldCheck,
   Sofa, Sprout, Star, Store, Tent, Tractor, Trees, Warehouse, X, BedDouble, type LucideIcon,
 } from 'lucide-react'
@@ -110,7 +110,7 @@ export function Stars({ value, size = 13 }: { value: number; size?: number }) {
 
 export function Avatar({ name, color, size = 44 }: { name: string; color: string; size?: number }) {
   return (
-    <span className="avatar" style={{ background: color, width: size, height: size, fontSize: size * 0.38 }}>
+    <span className="avatar" style={{ background: color, width: size, height: size, fontSize: Math.max(12, size * 0.38) }}>
       {initials(name)}
     </span>
   )
@@ -187,18 +187,45 @@ export const SAFETY_TIPS = [
   'Confirm the account name belongs to the owner or registered agency.',
 ]
 
-export function SafetyTips({ compact }: { compact?: boolean }) {
+/** Collapsible section — keeps secondary detail one tap away instead of on screen. */
+export function Fold({
+  title,
+  icon: Icon,
+  hint,
+  defaultOpen,
+  className = '',
+  children,
+}: {
+  title: string
+  icon?: LucideIcon
+  hint?: ReactNode
+  defaultOpen?: boolean
+  className?: string
+  children: ReactNode
+}) {
   return (
-    <div className="card safety">
-      <h4>
-        <ShieldCheck size={18} /> Safety tips
-      </h4>
+    <details className={`fold ${className}`} open={defaultOpen}>
+      <summary>
+        <span className="fold-title">
+          {Icon && <Icon size={18} />} {title}
+        </span>
+        {hint && <span className="fold-hint">{hint}</span>}
+        <ChevronDown size={18} className="fold-chev" />
+      </summary>
+      <div className="fold-body">{children}</div>
+    </details>
+  )
+}
+
+export function SafetyTips() {
+  return (
+    <Fold title="Safety tips" icon={ShieldCheck} hint={`${SAFETY_TIPS.length} tips`} className="safety">
       <ul>
-        {(compact ? SAFETY_TIPS.slice(0, 4) : SAFETY_TIPS).map((t) => (
+        {SAFETY_TIPS.map((t) => (
           <li key={t}>{t}</li>
         ))}
       </ul>
-    </div>
+    </Fold>
   )
 }
 
@@ -226,13 +253,8 @@ export function ScrollToTop() {
 export function Logo() {
   return (
     <Link to="/" className="logo" aria-label="House4Rent.ng home">
-      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden>
-        <rect width="32" height="32" rx="8" fill="#fff" />
-        <path d="M8 15.5 16 9l8 6.5V24a1 1 0 0 1-1 1h-4.5v-5.5h-5V25H9a1 1 0 0 1-1-1z" fill="var(--brand)" />
-        <circle cx="16" cy="16" r="1.6" fill="var(--accent)" />
-      </svg>
       <span className="logo-word">
-        House<b>4</b>Rent<small>.ng</small>
+        House<b>4</b>Rent<span className="logo-tld">.ng</span>
       </span>
     </Link>
   )

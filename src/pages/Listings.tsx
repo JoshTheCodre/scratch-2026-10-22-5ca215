@@ -1,29 +1,16 @@
 import { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Award, ChevronLeft, ChevronRight, Clock, LayoutGrid, List, Megaphone, SearchX, SlidersHorizontal, TrendingUp, X, ArrowUpDown } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutGrid, List, SearchX, SlidersHorizontal, X } from 'lucide-react'
 import { ALL_CATEGORIES, CATEGORIES, categoryBySlug, isCategorySlug } from '../data/categories'
 import { ALL_CITIES, cityBySlug, cityName } from '../data/locations'
 import { useStore } from '../lib/store'
-import { applyFilters, PAGE_SIZE, parseFilters, priceBands, scopeListings, sortListings, type Filters } from '../lib/filters'
+import { applyFilters, PAGE_SIZE, parseFilters, POSTED_OPTIONS, scopeListings, SORT_OPTIONS, sortListings } from '../lib/filters'
 import { nairaCompact, plural } from '../lib/format'
 import { ListingCard } from '../components/ListingCard'
 import { FilterSidebar, type SetParams } from '../components/FilterSidebar'
 import { LocationPicker } from '../components/LocationPicker'
-import { Breadcrumbs, CATEGORY_ICONS, EmptyState, typeIcon } from '../components/ui'
+import { CATEGORY_ICONS, EmptyState, typeIcon } from '../components/ui'
 import NotFound from './NotFound'
-
-const SORTS: [Filters['sort'], string][] = [
-  ['recommended', 'Recommended first'],
-  ['newest', 'Newest first'],
-  ['price-asc', 'Lowest price first'],
-  ['price-desc', 'Highest price first'],
-]
-const POSTED: [Filters['posted'], string][] = [
-  ['', 'Any time'],
-  ['24h', 'Last 24 hours'],
-  ['7d', 'Last 7 days'],
-  ['30d', 'Last 30 days'],
-]
 
 export default function Listings() {
   const { city = '', category = '' } = useParams()
@@ -48,22 +35,18 @@ function ListingsView({ city, category }: { city: string; category: string }) {
   const pages = Math.max(1, Math.ceil(results.length / PAGE_SIZE))
   const page = Math.min(f.page, pages)
   const pageItems = results.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const quickBands = useMemo(() => priceBands(scope).slice(0, 4), [scope])
 
   const set: SetParams = useCallback(
     (patch) => {
-      setSp(
-        (prev) => {
-          const next = new URLSearchParams(prev)
-          for (const [k, v] of Object.entries(patch)) {
-            const val = Array.isArray(v) ? v.join(',') : v
-            val === undefined || val === null || val === '' ? next.delete(k) : next.set(k, String(val))
-          }
-          if (!('page' in patch)) next.delete('page')
-          return next
-        },
-        { replace: false },
-      )
+      setSp((prev) => {
+        const next = new URLSearchParams(prev)
+        for (const [k, v] of Object.entries(patch)) {
+          const val = Array.isArray(v) ? v.join(',') : v
+          val === undefined || val === null || val === '' ? next.delete(k) : next.set(k, String(val))
+        }
+        if (!('page' in patch)) next.delete('page')
+        return next
+      })
     },
     [setSp],
   )
@@ -73,8 +56,8 @@ function ListingsView({ city, category }: { city: string; category: string }) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Only filters the user added — the city and category already live in the title.
   const chips: { label: string; clear: () => void }[] = []
-  if (city !== ALL_CITIES) chips.push({ label: cityName(city), clear: () => navigate(`/${ALL_CITIES}/${category}?${sp}`) })
   if (f.area) chips.push({ label: f.area, clear: () => set({ area: undefined }) })
   if (f.q) chips.push({ label: `“${f.q}”`, clear: () => set({ q: undefined }) })
   if (f.min !== undefined || f.max !== undefined)
@@ -88,8 +71,7 @@ function ListingsView({ city, category }: { city: string; category: string }) {
   f.docs.forEach((d) => chips.push({ label: d.replace(/ \(.*\)/, ''), clear: () => set({ docs: f.docs.filter((x) => x !== d) }) }))
   f.facilities.forEach((d) => chips.push({ label: d, clear: () => set({ facilities: f.facilities.filter((x) => x !== d) }) }))
   if (f.verified) chips.push({ label: 'Verified sellers', clear: () => set({ verified: undefined }) })
-  if (f.posted) chips.push({ label: POSTED.find(([k]) => k === f.posted)![1], clear: () => set({ posted: undefined }) })
-  const filterCount = chips.length - (city !== ALL_CITIES ? 1 : 0)
+  if (f.posted) chips.push({ label: POSTED_OPTIONS.find(([k]) => k === f.posted)![1], clear: () => set({ posted: undefined }) })
 
   const clearAll = () => navigate(`/${city}/${category}`)
   const sidebar = (
@@ -98,103 +80,59 @@ function ListingsView({ city, category }: { city: string; category: string }) {
 
   return (
     <div className="container page-listings">
-      <Breadcrumbs
-        items={[
-          { label: 'House4Rent', to: '/' },
-          ...(cat ? [{ label: `Property in ${cityName(city)}`, to: `/${city}/${ALL_CATEGORIES}` }] : []),
-          { label: `${results.length.toLocaleString()} results for ${cat ? cat.name : 'Property'} in ${place}` },
-        ]}
-      />
-
       <div className="listings-layout">
         <aside className="listings-side">{sidebar}</aside>
 
         <main className="listings-main">
-          <div className="promo-pills">
-            <Link to={`/agents${city !== ALL_CITIES ? `?city=${city}` : ''}`} className="promo-pill blue">
-              <Award size={20} /> Trusted agents
-            </Link>
-            <Link to={`/price-check?city=${city}&category=${category}`} className="promo-pill amber">
-              <TrendingUp size={20} /> Price check
-            </Link>
-          </div>
+          <header className="listings-head">
+            <h1 className="page-title">
+              {cat ? cat.name : 'Property'} <span className="title-place">in {place}</span>
+            </h1>
+            <p className="muted">{plural(results.length, 'advert')}</p>
+          </header>
 
-          <h1 className="page-title">
-            {cat ? cat.name : 'Property'} in {place}
-          </h1>
-
-          {quickBands.length > 0 && (
-            <div className="quick-prices">
-              {quickBands.map((b, k) => {
-                const on = f.min === b.min && f.max === b.max
-                const label = b.min === undefined ? `< ${nairaCompact(b.max!)}` : b.max === undefined ? `> ${nairaCompact(b.min)}` : `${nairaCompact(b.min)} – ${nairaCompact(b.max)}`
-                return (
-                  <button key={k} className={`qp ${on ? 'on' : ''}`} onClick={() => (on ? set({ min: undefined, max: undefined }) : set({ min: b.min, max: b.max }))}>
-                    {label}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          <div className="type-tiles">
+          <div className="type-chips">
             {cat
               ? cat.types.map((t) => {
                   const Icon = typeIcon(t)
                   const on = f.types.includes(t)
                   return (
-                    <button key={t} className={`type-tile ${on ? 'on' : ''}`} onClick={() => set({ type: on ? f.types.filter((x) => x !== t) : [...f.types, t] })}>
-                      <Icon size={26} strokeWidth={1.5} />
-                      <span>{t}</span>
+                    <button key={t} className={`tchip ${on ? 'on' : ''}`} aria-pressed={on} onClick={() => set({ type: on ? f.types.filter((x) => x !== t) : [...f.types, t] })}>
+                      <Icon size={16} /> {t}
                     </button>
                   )
                 })
               : CATEGORIES.map((c) => {
                   const Icon = CATEGORY_ICONS[c.slug]
                   return (
-                    <Link key={c.slug} to={`/${city}/${c.slug}`} className="type-tile">
-                      <Icon size={26} strokeWidth={1.5} />
-                      <span>{c.short}</span>
+                    <Link key={c.slug} to={`/${city}/${c.slug}`} className="tchip">
+                      <Icon size={16} /> {c.short}
                     </Link>
                   )
                 })}
           </div>
 
-          {chips.length > 0 && (
-            <div className="active-chips">
-              {chips.map((c) => (
-                <button key={c.label} className="achip" onClick={c.clear}>
-                  {c.label} <X size={14} />
-                </button>
-              ))}
-              {filterCount > 0 && (
+          <div className="toolbar">
+            <button className="btn btn-outline sm show-md" onClick={() => setMobileFilters(true)}>
+              <SlidersHorizontal size={16} /> Filters{chips.length > 0 ? ` · ${chips.length}` : ''}
+            </button>
+            {chips.length > 0 && (
+              <div className="active-chips hide-md">
+                {chips.map((c) => (
+                  <button key={c.label} className="achip" onClick={c.clear} aria-label={`Remove ${c.label}`}>
+                    {c.label} <X size={13} />
+                  </button>
+                ))}
                 <button className="link-btn" onClick={clearAll}>
                   Clear all
                 </button>
-              )}
-            </div>
-          )}
-
-          <div className="toolbar">
-            <button className="btn btn-outline show-md" onClick={() => setMobileFilters(true)}>
-              <SlidersHorizontal size={16} /> Filters{filterCount > 0 ? ` (${filterCount})` : ''}
-            </button>
-            <span className="muted hide-md">{plural(results.length, 'advert')}</span>
+              </div>
+            )}
             <div className="toolbar-right">
-              <label className="select-wrap">
-                <ArrowUpDown size={15} />
+              <label className="select-pill">
+                <span>Sort</span>
                 <select value={f.sort} onChange={(e) => set({ sort: e.target.value === 'recommended' ? undefined : e.target.value })} aria-label="Sort">
-                  {SORTS.map(([k, v]) => (
-                    <option key={k} value={k}>
-                      {v}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="select-wrap hide-sm">
-                <Clock size={15} />
-                <select value={f.posted} onChange={(e) => set({ posted: e.target.value || undefined })} aria-label="Posted">
-                  {POSTED.map(([k, v]) => (
+                  {SORT_OPTIONS.map(([k, v]) => (
                     <option key={k} value={k}>
                       {v}
                     </option>
@@ -203,10 +141,10 @@ function ListingsView({ city, category }: { city: string; category: string }) {
               </label>
               <div className="view-toggle" role="group" aria-label="Layout">
                 <button className={f.view === 'grid' ? 'on' : ''} onClick={() => set({ view: undefined, page: f.page > 1 ? f.page : undefined })} aria-label="Grid view">
-                  <LayoutGrid size={17} />
+                  <LayoutGrid size={16} />
                 </button>
                 <button className={f.view === 'list' ? 'on' : ''} onClick={() => set({ view: 'list', page: f.page > 1 ? f.page : undefined })} aria-label="List view">
-                  <List size={17} />
+                  <List size={16} />
                 </button>
               </div>
             </div>
@@ -225,10 +163,8 @@ function ListingsView({ city, category }: { city: string; category: string }) {
             />
           ) : (
             <div className={f.view === 'list' ? 'card-list' : 'card-grid'}>
-              {pageItems.map((l, k) => (
-                <FragmentWithPromo key={l.id} show={k === 7 && page === 1} category={category}>
-                  <ListingCard l={l} view={f.view} />
-                </FragmentWithPromo>
+              {pageItems.map((l) => (
+                <ListingCard key={l.id} l={l} view={f.view} />
               ))}
             </div>
           )}
@@ -280,7 +216,18 @@ function ListingsView({ city, category }: { city: string; category: string }) {
             Reset
           </button>
         </div>
-        <div className="sheet-body">{mobileFilters && sidebar}</div>
+        <div className="sheet-body">
+          {chips.length > 0 && (
+            <div className="active-chips">
+              {chips.map((c) => (
+                <button key={c.label} className="achip" onClick={c.clear}>
+                  {c.label} <X size={13} />
+                </button>
+              ))}
+            </div>
+          )}
+          {mobileFilters && sidebar}
+        </div>
         <div className="sheet-foot">
           <button className="btn btn-primary block" onClick={() => setMobileFilters(false)}>
             Show {plural(results.length, 'result')}
@@ -288,21 +235,5 @@ function ListingsView({ city, category }: { city: string; category: string }) {
         </div>
       </div>
     </div>
-  )
-}
-
-function FragmentWithPromo({ show, category, children }: { show: boolean; category: string; children: React.ReactNode }) {
-  return (
-    <>
-      {children}
-      {show && (
-        <Link to={`/sell${category !== ALL_CATEGORIES ? `?category=${category}` : ''}`} className="promo-card">
-          <Megaphone size={30} />
-          <strong>Have a property to rent or sell?</strong>
-          <span>Post it free and reach thousands of serious buyers and tenants.</span>
-          <span className="btn btn-accent">Post advert</span>
-        </Link>
-      )}
-    </>
   )
 }

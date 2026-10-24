@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, Minus, Plus, Search } from 'lucide-react'
+import { Award, ChevronDown, ChevronRight, MapPin, Search, TrendingUp } from 'lucide-react'
 import type { Listing } from '../types'
 import { ALL_CATEGORIES, CATEGORIES, CONDITIONS, FURNISHING, LAND_DOCUMENTS, categoryBySlug } from '../data/categories'
-import { cityName } from '../data/locations'
-import { applyFilters, countBy, priceBands, type Filters } from '../lib/filters'
+import { ALL_CITIES, cityName } from '../data/locations'
+import { applyFilters, countBy, POSTED_OPTIONS, priceBands, type Filters } from '../lib/filters'
 import { nairaCompact } from '../lib/format'
 import { sellerById } from '../data/sellers'
 
@@ -22,13 +22,16 @@ interface Props {
   onPickLocation: () => void
 }
 
-function Section({ title, children, defaultOpen = true }: { title: string; children: ReactNode; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen)
+function Section({ title, active, children, defaultOpen = true }: { title: string; active?: boolean; children: ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen || !!active)
   return (
-    <section className="card fsec">
+    <section className="fsec">
       <button className="fsec-head" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-        <span>{title}</span>
-        {open ? <Minus size={16} /> : <Plus size={16} />}
+        <span>
+          {title}
+          {active && <i className="fsec-dot" aria-label="filter active" />}
+        </span>
+        <ChevronDown size={17} className={open ? 'flip' : ''} />
       </button>
       {open && <div className="fsec-body">{children}</div>}
     </section>
@@ -92,49 +95,49 @@ export function FilterSidebar({ city, category, cityPool, scope, f, set, onPickL
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([k]) => k).slice(0, 14)
   }, [scope])
   const verifiedCount = applyFilters(scope, f, ['verified']).filter((l) => l.isUserAd || sellerById(l.sellerId)?.verified).length
+  const postedCounts = (p: Filters['posted']) => applyFilters(scope, { ...f, posted: p }).length
   const bedCounts = countBy(applyFilters(scope, f, ['beds']), (l) => (l.bedrooms ? String(Math.min(5, l.bedrooms)) : undefined))
   const bathCounts = countBy(applyFilters(scope, f, ['baths']), (l) => (l.bathrooms ? String(Math.min(4, l.bathrooms)) : undefined))
-  const cats = showAllCats ? CATEGORIES : CATEGORIES.slice(0, 5)
+  const cats = showAllCats || !!cat ? CATEGORIES : CATEGORIES.slice(0, 5)
   const bandKey = (b: { min?: number; max?: number }) => `${b.min ?? ''}-${b.max ?? ''}`
   const activeBand = `${f.min ?? ''}-${f.max ?? ''}`
 
   return (
     <div className="filters">
-      <section className="card fcats">
-        <h4 className="fcats-head">Categories</h4>
-        <Link to={`/${city}/${ALL_CATEGORIES}`} className={`fcats-root ${category === ALL_CATEGORIES ? 'active' : ''}`}>
-          Property <small>{cityPool.length.toLocaleString()}</small>
+      <section className="fsec fcats">
+        <h4 className="fsec-label">Category</h4>
+        <Link to={`/${city}/${ALL_CATEGORIES}`} className={`fcat ${category === ALL_CATEGORIES ? 'active' : ''}`}>
+          All property <small>{cityPool.length.toLocaleString()}</small>
         </Link>
-        <ul>
-          {cats.map((c) => (
-            <li key={c.slug}>
-              <Link to={`/${city}/${c.slug}`} className={c.slug === category ? 'active' : ''}>
-                {c.name} <small>{(catCounts.get(c.slug) ?? 0).toLocaleString()}</small>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <button className="link-btn" onClick={() => setShowAllCats((v) => !v)}>
-          {showAllCats ? 'Show less' : `Show all ${CATEGORIES.length}`}
-        </button>
+        {cats.map((c) => (
+          <Link key={c.slug} to={`/${city}/${c.slug}`} className={`fcat ${c.slug === category ? 'active' : ''}`}>
+            {c.name} <small>{(catCounts.get(c.slug) ?? 0).toLocaleString()}</small>
+          </Link>
+        ))}
+        {!cat && (
+          <button className="link-btn" onClick={() => setShowAllCats((v) => !v)}>
+            {showAllCats ? 'Show less' : `Show all ${CATEGORIES.length}`}
+          </button>
+        )}
       </section>
 
-      <button className="card floc" onClick={onPickLocation}>
+      <button className="fsec floc" onClick={onPickLocation}>
+        <MapPin size={18} />
         <span>
           <span className="floc-label">Location</span>
           <span className="floc-value">
             {f.area ? `${f.area}, ` : ''}
-            {cityName(city)}
+            {city === ALL_CITIES ? 'All Nigeria' : cityName(city)}
           </span>
         </span>
         <ChevronRight size={18} />
       </button>
 
-      <Section title="Price, ₦">
+      <Section title="Price" active={f.min !== undefined || f.max !== undefined}>
         <div className="price-inputs">
-          <input inputMode="numeric" placeholder="min" value={min} onChange={(e) => setMin(e.target.value.replace(/\D/g, ''))} aria-label="Minimum price" />
+          <input inputMode="numeric" placeholder="Min ₦" value={min} onChange={(e) => setMin(e.target.value.replace(/\D/g, ''))} aria-label="Minimum price" />
           <span>–</span>
-          <input inputMode="numeric" placeholder="max" value={max} onChange={(e) => setMax(e.target.value.replace(/\D/g, ''))} aria-label="Maximum price" />
+          <input inputMode="numeric" placeholder="Max ₦" value={max} onChange={(e) => setMax(e.target.value.replace(/\D/g, ''))} aria-label="Maximum price" />
         </div>
         <ul className="radios">
           {bands.map((b) => (
@@ -142,9 +145,9 @@ export function FilterSidebar({ city, category, cityPool, scope, f, set, onPickL
               <label>
                 <input type="radio" name="band" checked={activeBand === bandKey(b)} onChange={() => set({ min: b.min, max: b.max })} />
                 <span>
-                  {b.min === undefined ? `Under ${nairaCompact(b.max!)}` : b.max === undefined ? `More than ${nairaCompact(b.min)}` : `${nairaCompact(b.min)} – ${nairaCompact(b.max)}`}
+                  {b.min === undefined ? `Under ${nairaCompact(b.max!)}` : b.max === undefined ? `Over ${nairaCompact(b.min)}` : `${nairaCompact(b.min)} – ${nairaCompact(b.max)}`}
                 </span>
-                <small>{b.count} ads</small>
+                <small>{b.count}</small>
               </label>
             </li>
           ))}
@@ -153,23 +156,22 @@ export function FilterSidebar({ city, category, cityPool, scope, f, set, onPickL
           <button className="link-btn muted" onClick={() => set({ min: undefined, max: undefined })}>
             Clear
           </button>
-          <button className="link-btn" onClick={() => set({ min: min || undefined, max: max || undefined })}>
-            Save
+          <button className="btn btn-soft sm" onClick={() => set({ min: min || undefined, max: max || undefined })}>
+            Apply
           </button>
         </div>
       </Section>
 
-      <Section title="Property type">
+      <Section title="Property type" active={f.types.length > 0}>
         <CheckList options={typeOptions} selected={f.types} counts={facet('types', (l) => l.propertyType)} onChange={(v) => set({ type: v })} searchable />
       </Section>
 
       {residential && (
-        <Section title="Bedrooms">
+        <Section title="Bedrooms" active={f.beds.length > 0}>
           <div className="pills">
             {[1, 2, 3, 4, 5].map((n) => (
               <button key={n} className={`pill ${f.beds.includes(n) ? 'on' : ''}`} onClick={() => set({ beds: toggle(f.beds, n).map(String) })} disabled={!bedCounts.get(String(n)) && !f.beds.includes(n)}>
                 {n === 5 ? '5+' : n}
-                <small>{bedCounts.get(String(n)) ?? 0}</small>
               </button>
             ))}
           </div>
@@ -177,12 +179,11 @@ export function FilterSidebar({ city, category, cityPool, scope, f, set, onPickL
       )}
 
       {residential && (
-        <Section title="Bathrooms" defaultOpen={false}>
+        <Section title="Bathrooms" active={f.baths.length > 0} defaultOpen={false}>
           <div className="pills">
             {[1, 2, 3, 4].map((n) => (
               <button key={n} className={`pill ${f.baths.includes(n) ? 'on' : ''}`} onClick={() => set({ baths: toggle(f.baths, n).map(String) })} disabled={!bathCounts.get(String(n)) && !f.baths.includes(n)}>
                 {n === 4 ? '4+' : n}
-                <small>{bathCounts.get(String(n)) ?? 0}</small>
               </button>
             ))}
           </div>
@@ -190,34 +191,59 @@ export function FilterSidebar({ city, category, cityPool, scope, f, set, onPickL
       )}
 
       {residential && (
-        <Section title="Furnishing">
+        <Section title="Furnishing" active={f.furnishing.length > 0} defaultOpen={false}>
           <CheckList options={[...FURNISHING]} selected={f.furnishing} counts={facet('furnishing', (l) => l.furnishing)} onChange={(v) => set({ furnishing: v })} />
         </Section>
       )}
 
       {cat?.group !== 'land' && (
-        <Section title="Condition" defaultOpen={false}>
+        <Section title="Condition" active={f.condition.length > 0} defaultOpen={false}>
           <CheckList options={[...CONDITIONS]} selected={f.condition} counts={facet('condition', (l) => l.condition)} onChange={(v) => set({ condition: v })} />
         </Section>
       )}
 
       {showDocs && (
-        <Section title="Title document" defaultOpen={cat?.group === 'land'}>
+        <Section title="Title document" active={f.docs.length > 0} defaultOpen={cat?.group === 'land'}>
           <CheckList options={[...new Set([...LAND_DOCUMENTS, 'Certificate of Occupancy (C of O)'])]} selected={f.docs} counts={facet('docs', (l) => l.document)} onChange={(v) => set({ docs: v })} />
         </Section>
       )}
 
-      <Section title={cat?.group === 'land' ? 'Land features' : 'Facilities'} defaultOpen={false}>
+      <Section title={cat?.group === 'land' ? 'Land features' : 'Facilities'} active={f.facilities.length > 0} defaultOpen={false}>
         <CheckList options={facilityOptions} selected={f.facilities} counts={countBy(applyFilters(scope, f, ['facilities']), (l) => l.facilities)} onChange={(v) => set({ facilities: v })} />
       </Section>
 
-      <Section title="Verified sellers">
-        <label className="check-row">
-          <input type="checkbox" checked={f.verified} onChange={(e) => set({ verified: e.target.checked ? '1' : undefined })} />
-          <span>Verified sellers</span>
-          <small>{verifiedCount} ads</small>
-        </label>
+      <Section title="Posted" active={!!f.posted} defaultOpen={false}>
+        <ul className="radios">
+          {POSTED_OPTIONS.map(([k, label]) => (
+            <li key={k || 'any'}>
+              <label>
+                <input type="radio" name="posted" checked={f.posted === k} onChange={() => set({ posted: k || undefined })} />
+                <span>{label}</span>
+                <small>{postedCounts(k)}</small>
+              </label>
+            </li>
+          ))}
+        </ul>
       </Section>
+
+      <section className="fsec">
+        <label className="switch-row">
+          <span>
+            Verified sellers only
+            <small>{verifiedCount} adverts</small>
+          </span>
+          <input type="checkbox" role="switch" className="switch" checked={f.verified} onChange={(e) => set({ verified: e.target.checked ? '1' : undefined })} />
+        </label>
+      </section>
+
+      <nav className="ftools">
+        <Link to={`/agents${city !== ALL_CITIES ? `?city=${city}` : ''}`}>
+          <Award size={16} /> Trusted agents
+        </Link>
+        <Link to={`/price-check?city=${city}&category=${category}`}>
+          <TrendingUp size={16} /> Price check
+        </Link>
+      </nav>
     </div>
   )
 }

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, MessageCircle, Send } from 'lucide-react'
+import { ArrowLeft, MessageCircle, Phone, Send } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sellerById } from '../data/sellers'
-import { listingPath, naira, timeAgo, unitLabel } from '../lib/format'
-import { Avatar, EmptyState, Img } from '../components/ui'
+import { listingPath, naira, shortAgo, timeAgo, unitLabel } from '../lib/format'
+import { Avatar, Breadcrumbs, EmptyState, Img } from '../components/ui'
 
 const QUICK = ['Is this still available?', 'When can I inspect?', 'Is the price negotiable?', 'What documents come with it?']
 
@@ -13,7 +13,8 @@ export default function Messages() {
   const { threads, byId, sendMessage, markRead } = useStore()
   const navigate = useNavigate()
   const [text, setText] = useState('')
-  const endRef = useRef<HTMLDivElement>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const openedThread = useRef<string | undefined>(undefined)
   const active = threads.find((t) => t.id === threadId)
   const listing = byId(active?.listingId)
   const seller = sellerById(active?.sellerId)
@@ -21,9 +22,15 @@ export default function Messages() {
   useEffect(() => {
     if (active?.unread) markRead(active.id)
   }, [active, markRead])
+  // Scroll the chat area itself (not the page): jump to the latest message when a chat
+  // opens, glide when a new one arrives.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [active?.messages.length])
+    const el = bodyRef.current
+    if (!el) return
+    const justOpened = openedThread.current !== active?.id
+    openedThread.current = active?.id
+    el.scrollTo({ top: el.scrollHeight, behavior: justOpened ? 'auto' : 'smooth' })
+  }, [active?.id, active?.messages.length])
 
   const send = (msg: string) => {
     if (!active || !msg.trim()) return
@@ -34,6 +41,7 @@ export default function Messages() {
   if (threads.length === 0)
     return (
       <div className="container page-simple">
+        <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'Messages' }]} />
         <h1 className="page-title">Messages</h1>
         <EmptyState
           icon={MessageCircle}
@@ -58,14 +66,19 @@ export default function Messages() {
             const s = sellerById(t.sellerId)
             const last = t.messages[t.messages.length - 1]
             return (
-              <button key={t.id} className={`chat-item ${t.id === threadId ? 'on' : ''}`} onClick={() => navigate(`/messages/${t.id}`)}>
+              <button key={t.id} className={`chat-item ${t.id === threadId ? 'on' : ''} ${t.unread ? 'unread' : ''}`} onClick={() => navigate(`/messages/${t.id}`)}>
                 <Img src={l?.images[0]} alt="" width={120} />
                 <span className="chat-item-body">
-                  <strong>{s?.name ?? 'Seller'}</strong>
-                  <small className="ellipsis">{l?.title}</small>
-                  <small className="muted ellipsis">{last ? `${last.from === 'me' ? 'You: ' : ''}${last.text}` : 'No messages yet'}</small>
+                  <span className="chat-item-top">
+                    <strong className="ellipsis">{s?.name ?? 'Seller'}</strong>
+                    {last && <time dateTime={last.at}>{shortAgo(last.at)}</time>}
+                  </span>
+                  <small className="ellipsis chat-item-listing">{l?.title}</small>
+                  <span className="chat-item-bottom">
+                    <small className="ellipsis chat-item-last">{last ? `${last.from === 'me' ? 'You: ' : ''}${last.text}` : 'No messages yet — say hello'}</small>
+                    {t.unread > 0 && <span className="dot-count static">{t.unread}</span>}
+                  </span>
                 </span>
-                {t.unread > 0 && <span className="dot-count static">{t.unread}</span>}
               </button>
             )
           })}
@@ -88,6 +101,11 @@ export default function Messages() {
                   <strong>{seller?.name}</strong>
                   <small className="muted">{seller?.responseTime}</small>
                 </div>
+                {seller && (
+                  <a className="icon-btn chat-call" href={`tel:${seller.phone.replace(/\s/g, '')}`} aria-label={`Call ${seller.name}`} title="Call">
+                    <Phone size={19} />
+                  </a>
+                )}
               </header>
               <Link to={listingPath(listing)} className="chat-listing">
                 <Img src={listing.images[0]} alt="" width={160} />
@@ -98,7 +116,7 @@ export default function Messages() {
                   </span>
                 </span>
               </Link>
-              <div className="chat-body">
+              <div className="chat-body" ref={bodyRef}>
                 {active.messages.length === 0 && <p className="chat-hint">Say hello — ask about availability, inspection or price.</p>}
                 {active.messages.map((m, i) => (
                   <div key={i} className={`bubble ${m.from}`}>
@@ -106,7 +124,6 @@ export default function Messages() {
                     <small>{timeAgo(m.at)}</small>
                   </div>
                 ))}
-                <div ref={endRef} />
               </div>
               <div className="quick-replies">
                 {QUICK.map((q) => (

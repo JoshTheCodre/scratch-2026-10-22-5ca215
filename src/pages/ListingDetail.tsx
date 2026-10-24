@@ -1,18 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import {
-  Ban, Bath, BedDouble, Calculator, Car, ChevronDown, ChevronRight, Clock, Eye, Flag, MapPin, MessageCircle, Phone, PhoneCall,
-  Ruler, Share2, TrendingUp, LandPlot, Check,
-} from 'lucide-react'
+import { Bath, BedDouble, Calculator, Car, Check, ChevronLeft, ChevronRight, LandPlot, Map as MapIcon, MapPin, MessageCircle, Phone, PhoneCall, Ruler, Share2, TrendingUp } from 'lucide-react'
 import type { Listing } from '../types'
 import { categoryBySlug } from '../data/categories'
-import { cityBySlug, cityName } from '../data/locations'
+import { cityName } from '../data/locations'
 import { sellerById } from '../data/sellers'
 import { useStore } from '../lib/store'
 import { maskPhone, naira, nairaCompact, timeAgo, unitLabel, yearsOn } from '../lib/format'
 import { Gallery } from '../components/Gallery'
 import { ListingCard } from '../components/ListingCard'
-import { Avatar, Breadcrumbs, Modal, SafetyTips, SaveButton, Stars, TierTag, VerifiedBadge, typeIcon } from '../components/ui'
+import { Avatar, Fold, Modal, SafetyTips, SaveButton, Stars, VerifiedBadge, typeIcon } from '../components/ui'
 import NotFound from './NotFound'
 
 export default function ListingDetail() {
@@ -49,29 +46,26 @@ function Detail({ l }: { l: Listing }) {
       listings
         .filter((x) => x.id !== l.id && x.status === 'active' && x.category === l.category && x.city === l.city)
         .sort((a, b) => Math.abs(Math.log(a.price / l.price)) - Math.abs(Math.log(b.price / l.price)))
-        .slice(0, 8),
+        .slice(0, 4),
     [listings, l],
   )
   const recentItems = recent.filter((r) => r !== l.id).map((r) => byId(r)).filter(Boolean).slice(0, 4) as Listing[]
 
   const keyFacts = [
     { icon: typeIcon(l.propertyType), label: l.propertyType },
-    l.bedrooms ? { icon: BedDouble, label: `${l.bedrooms} bedroom${l.bedrooms > 1 ? 's' : ''}` } : null,
-    l.bathrooms ? { icon: Bath, label: `${l.bathrooms} bathroom${l.bathrooms > 1 ? 's' : ''}` } : null,
+    l.bedrooms ? { icon: BedDouble, label: `${l.bedrooms} bed${l.bedrooms > 1 ? 's' : ''}` } : null,
+    l.bathrooms ? { icon: Bath, label: `${l.bathrooms} bath${l.bathrooms > 1 ? 's' : ''}` } : null,
     l.plots ? { icon: LandPlot, label: `${l.plots} plot${l.plots > 1 ? 's' : ''}` } : null,
     l.sizeSqm ? { icon: Ruler, label: `${l.sizeSqm.toLocaleString()} sqm` } : null,
     l.parking ? { icon: Car, label: `${l.parking} parking` } : null,
   ].filter(Boolean) as { icon: typeof Car; label: string }[]
 
   const attrs: [string, string | number | undefined][] = [
-    ['Property address', l.address],
+    ['Address', l.address],
     ['Estate', l.estate],
     ['Condition', l.condition],
     ['Furnishing', l.furnishing],
     ['Toilets', l.toilets],
-    ['Parking spaces', l.parking],
-    ['Size', l.sizeSqm ? `${l.sizeSqm.toLocaleString()} sqm` : undefined],
-    ['Number of plots', l.plots],
     ['Title document', l.document],
     ['Agency fee', l.agentFee ? `${l.agentFee}%` : undefined],
     ['Caution / deposit', l.cautionFee ? naira(l.cautionFee) : undefined],
@@ -95,146 +89,118 @@ function Detail({ l }: { l: Listing }) {
       /* user cancelled */
     }
   }
-  const city = cityBySlug(l.city)
   const mapBox = `${l.lng - 0.012},${l.lat - 0.008},${l.lng + 0.012},${l.lat + 0.008}`
+  const priceCheckUrl = `/price-check?city=${l.city}&category=${l.category}&type=${encodeURIComponent(l.propertyType)}${l.bedrooms ? `&beds=${l.bedrooms}` : ''}`
+  const price = (
+    <div className="price-big">
+      {naira(l.price)} {unit && <small>{unit}</small>}
+    </div>
+  )
 
   return (
     <div className="container page-detail">
-      <Breadcrumbs
-        items={[
-          { label: 'All ads', to: '/nigeria/real-estate' },
-          { label: 'Property', to: `/${l.city}/real-estate` },
-          { label: cat.name, to: `/${l.city}/${l.category}` },
-          { label: l.propertyType, to: `/${l.city}/${l.category}?type=${encodeURIComponent(l.propertyType)}` },
-          { label: l.title },
-        ]}
-      />
+      <nav className="back-row">
+        <Link to={`/${l.city}/${l.category}`} className="back-link">
+          <ChevronLeft size={18} /> {cat.name} in {cityName(l.city)}
+        </Link>
+      </nav>
 
       <div className="detail-layout">
         <div className="detail-main">
           <Gallery images={l.images} title={l.title} />
 
-          <section className="card detail-info">
-            <div className="detail-meta">
-              <TierTag tier={l.tier} />
-              <span>
-                <MapPin size={14} /> {city?.state}, {cityName(l.city)}, {l.area}
-              </span>
-              <span>
-                <Clock size={14} /> {timeAgo(l.postedAt)}
-              </span>
-              <span className="push">
-                <Eye size={14} /> {l.views.toLocaleString()} views
-              </span>
+          <section className="detail-head">
+            <div className="detail-head-row">
+              <div>
+                {l.tier === 'featured' && <span className="flag">Featured</span>}
+                <h1>{l.title}</h1>
+                <p className="detail-sub">
+                  <MapPin size={15} /> {l.area}, {cityName(l.city)} · {timeAgo(l.postedAt)} · {l.views.toLocaleString()} views
+                </p>
+              </div>
+              <div className="detail-tools">
+                <button className="icon-pill" onClick={share} aria-label="Share" title="Share">
+                  <Share2 size={18} />
+                </button>
+                <SaveButton id={l.id} variant="inline" />
+              </div>
             </div>
-            <div className="detail-title-row">
-              <h1>{l.title}</h1>
-              <SaveButton id={l.id} variant="inline" />
+            <div className="detail-price-mobile">
+              {price}
+              {l.negotiable && <span className="tag">Negotiable</span>}
             </div>
             {l.status === 'unavailable' && <div className="notice warn">This advert is marked as no longer available.</div>}
-
             <div className="key-facts">
               {keyFacts.map(({ icon: Icon, label }) => (
-                <div key={label} className="key-fact">
-                  <span>
-                    <Icon size={22} strokeWidth={1.6} />
-                  </span>
-                  {label}
-                </div>
+                <span key={label} className="key-fact">
+                  <Icon size={18} strokeWidth={1.7} /> {label}
+                </span>
               ))}
             </div>
+          </section>
 
-            {shownAttrs.length > 0 && (
-              <>
-                <dl className="attr-grid">
-                  {visibleAttrs.map(([k, v]) => (
-                    <div key={k}>
-                      <dd>{v}</dd>
-                      <dt>{k}</dt>
-                    </div>
-                  ))}
-                </dl>
-                {shownAttrs.length > 6 && (
-                  <button className="link-btn right" onClick={() => setMoreAttrs((v) => !v)}>
-                    {moreAttrs ? 'Show less' : 'Show more'} <ChevronDown size={15} className={moreAttrs ? 'flip' : ''} />
-                  </button>
-                )}
-              </>
-            )}
-
+          <section className="detail-section">
+            <h2>About this property</h2>
             <div className={`description ${longDesc && !descOpen ? 'clamped' : ''}`}>
               <p>{l.description}</p>
             </div>
             {longDesc && (
               <button className="link-btn" onClick={() => setDescOpen((v) => !v)}>
-                {descOpen ? 'Show less' : 'Read full description'}
+                {descOpen ? 'Show less' : 'Read more'}
               </button>
             )}
-
-            {l.facilities.length > 0 && (
-              <>
-                <h3 className="sub-h">{cat.group === 'land' ? 'Land features' : 'Facilities'}</h3>
-                <ul className="facility-list">
-                  {l.facilities.map((x) => (
-                    <li key={x}>
-                      <Check size={15} /> {x}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-
-            <div className="detail-actions">
-              <ContactButton phone={seller.phone} shown={showPhone} onShow={() => setShowPhone(true)} />
-              <button className="btn btn-outline" onClick={share}>
-                <Share2 size={16} /> Share
-              </button>
-            </div>
           </section>
 
-          <CostCalculator l={l} />
+          {shownAttrs.length > 0 && (
+            <section className="detail-section">
+              <h2>Details</h2>
+              <dl className="attr-grid">
+                {visibleAttrs.map(([k, v]) => (
+                  <div key={k}>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+              {shownAttrs.length > 6 && (
+                <button className="link-btn mt-sm" onClick={() => setMoreAttrs((v) => !v)}>
+                  {moreAttrs ? 'Show less' : `Show all ${shownAttrs.length} details`}
+                </button>
+              )}
+            </section>
+          )}
 
-          <section className="card map-card">
-            <h3 className="sub-h">
-              <MapPin size={18} /> Location
-            </h3>
-            <p className="muted">
-              {l.address ?? l.area}, {cityName(l.city)} — approximate location. Confirm the exact address with the seller before inspection.
-            </p>
-            <iframe
-              title="Map"
-              loading="lazy"
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBox}&layer=mapnik&marker=${l.lat},${l.lng}`}
-            />
-          </section>
+          {l.facilities.length > 0 && (
+            <section className="detail-section">
+              <h2>{cat.group === 'land' ? 'Land features' : 'Facilities'}</h2>
+              <ul className="facility-list">
+                {l.facilities.map((x) => (
+                  <li key={x}>
+                    <Check size={16} /> {x}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <div className="detail-folds">
+            <CostCalculator l={l} />
+            <Fold title="Location" icon={MapIcon} hint={`${l.area}, ${cityName(l.city)}`}>
+              <p className="muted small">Approximate location. Confirm the exact address with the seller before inspection.</p>
+              <iframe className="map" title="Map" loading="lazy" src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBox}&layer=mapnik&marker=${l.lat},${l.lng}`} />
+            </Fold>
+          </div>
         </div>
 
         <aside className="detail-side">
-          <section className="card price-card">
-            <div className="price-big">
-              {naira(l.price)} {unit && <small>{unit}</small>}
+          <section className="side-card">
+            <div className="side-price">
+              {price}
+              {l.negotiable && <span className="tag">Negotiable</span>}
             </div>
-            {l.negotiable && <span className="tag">Negotiable</span>}
-            <button className="btn btn-outline-brand block" onClick={() => setModal('callback')}>
-              <PhoneCall size={16} /> Request call back
-            </button>
-          </section>
 
-          <Link
-            to={`/price-check?city=${l.city}&category=${l.category}&type=${encodeURIComponent(l.propertyType)}${l.bedrooms ? `&beds=${l.bedrooms}` : ''}`}
-            className="card price-check-link"
-          >
-            <TrendingUp size={20} />
-            <span>
-              Check average price of {l.bedrooms ? `${l.bedrooms} bedroom ` : ''}
-              {l.propertyType.toLowerCase()} in <strong>{cityName(l.city)}</strong>
-            </span>
-            <ChevronRight size={18} />
-          </Link>
-
-          <section className="card seller-card">
-            <div className="seller-head">
-              <Avatar name={seller.name} color={seller.color} size={56} />
+            <div className="seller-row">
+              <Avatar name={seller.name} color={seller.color} size={46} />
               <div>
                 {l.isUserAd ? (
                   <strong>{seller.name}</strong>
@@ -244,47 +210,58 @@ function Detail({ l }: { l: Listing }) {
                   </Link>
                 )}
                 <div className="seller-sub">
-                  <VerifiedBadge seller={seller} />
+                  <VerifiedBadge seller={seller} compact />
                   <span>{yearsOn(seller.joinedYear)}</span>
                 </div>
                 {seller.reviews > 0 && (
                   <div className="seller-rating">
-                    <Stars value={seller.rating} /> {seller.rating.toFixed(1)} · {seller.reviews} reviews
+                    <Stars value={seller.rating} size={12} /> {seller.rating.toFixed(1)} · {seller.reviews} reviews
                   </div>
                 )}
-                <small className="muted">{seller.responseTime}</small>
               </div>
             </div>
+
             {l.isUserAd ? (
               <Link to="/my-ads" className="btn btn-primary block">
                 Manage this advert
               </Link>
             ) : (
-              <>
-                <ContactButton phone={seller.phone} shown={showPhone} onShow={() => setShowPhone(true)} block />
-                <button className="btn btn-outline-brand block" onClick={startChat}>
-                  <MessageCircle size={16} /> Start chat
+              <div className="side-actions">
+                <ContactButton phone={seller.phone} shown={showPhone} onShow={() => setShowPhone(true)} />
+                <button className="btn btn-soft block" onClick={startChat}>
+                  <MessageCircle size={17} /> Chat with seller
                 </button>
-              </>
+                <button className="link-btn center" onClick={() => setModal('callback')}>
+                  <PhoneCall size={15} /> Request a call back
+                </button>
+              </div>
             )}
-          </section>
+            <p className="side-note">{seller.responseTime}</p>
 
-          {!l.isUserAd && (
-            <section className="card side-links">
-              <button className="link-btn" onClick={() => setModal('unavailable')}>
-                <Ban size={15} /> Mark unavailable
-              </button>
-              <button className="link-btn danger" onClick={() => setModal('report')}>
-                <Flag size={15} /> Report abuse
-              </button>
-            </section>
-          )}
+            <Link to={priceCheckUrl} className="price-check-link">
+              <TrendingUp size={17} />
+              <span>Compare with similar {l.bedrooms ? `${l.bedrooms}-bed ` : ''}listings</span>
+              <ChevronRight size={16} />
+            </Link>
+          </section>
 
           <SafetyTips />
 
-          <Link to={`/sell?category=${l.category}`} className="btn btn-outline-brand block">
-            Post ad like this
-          </Link>
+          <div className="side-links">
+            {!l.isUserAd && (
+              <>
+                <button className="link-btn muted" onClick={() => setModal('unavailable')}>
+                  Mark unavailable
+                </button>
+                <button className="link-btn muted" onClick={() => setModal('report')}>
+                  Report
+                </button>
+              </>
+            )}
+            <Link to={`/sell?category=${l.category}`} className="link-btn muted">
+              Post one like this
+            </Link>
+          </div>
         </aside>
       </div>
 
@@ -319,7 +296,7 @@ function Detail({ l }: { l: Listing }) {
 
       {!l.isUserAd && (
         <div className="mobile-cta">
-          <a className="btn btn-outline-brand" href={`tel:${seller.phone.replace(/\s/g, '')}`}>
+          <a className="btn btn-soft" href={`tel:${seller.phone.replace(/\s/g, '')}`}>
             <Phone size={16} /> Call
           </a>
           <button className="btn btn-primary" onClick={startChat}>
@@ -351,16 +328,16 @@ function Detail({ l }: { l: Listing }) {
   )
 }
 
-function ContactButton({ phone, shown, onShow, block }: { phone: string; shown: boolean; onShow: () => void; block?: boolean }) {
+function ContactButton({ phone, shown, onShow }: { phone: string; shown: boolean; onShow: () => void }) {
   if (shown)
     return (
-      <a className={`btn btn-primary ${block ? 'block' : ''}`} href={`tel:${phone.replace(/\s/g, '')}`}>
-        <Phone size={16} /> {phone}
+      <a className="btn btn-primary block" href={`tel:${phone.replace(/\s/g, '')}`}>
+        <Phone size={17} /> {phone}
       </a>
     )
   return (
-    <button className={`btn btn-primary ${block ? 'block' : ''}`} onClick={onShow}>
-      <Phone size={16} /> Show contact <span className="phone-mask">{maskPhone(phone)}</span>
+    <button className="btn btn-primary block" onClick={onShow}>
+      <Phone size={17} /> Show contact <span className="phone-mask">{maskPhone(phone)}</span>
     </button>
   )
 }
@@ -375,17 +352,15 @@ function CostCalculator({ l }: { l: Listing }) {
 
   if (l.priceUnit === 'per day') {
     const sub = l.price * nights
+    const total = sub + (l.cautionFee ?? 0)
     return (
-      <section className="card calc">
-        <h3 className="sub-h">
-          <Calculator size={18} /> Booking estimate
-        </h3>
+      <Fold title="Booking estimate" icon={Calculator} hint={`${nairaCompact(total)} for ${nights} ${cat.group === 'venue' ? 'day' : 'night'}${nights > 1 ? 's' : ''}`}>
         <label className="calc-row">
           <span>{cat.group === 'venue' ? 'Days' : 'Nights'}</span>
           <input type="number" min={1} max={60} value={nights} onChange={(e) => setNights(Math.max(1, Number(e.target.value) || 1))} />
         </label>
-        <Rows rows={[[`${naira(l.price)} × ${nights}`, sub], ['Refundable caution', l.cautionFee ?? 0]]} total={sub + (l.cautionFee ?? 0)} totalLabel="Pay on check-in" />
-      </section>
+        <Rows rows={[[`${naira(l.price)} × ${nights}`, sub], ['Refundable caution', l.cautionFee ?? 0]]} total={total} totalLabel="Pay on check-in" />
+      </Fold>
     )
   }
 
@@ -400,14 +375,12 @@ function CostCalculator({ l }: { l: Listing }) {
       ['Caution deposit', l.cautionFee ?? 0],
       ['Service charge', l.serviceCharge ?? 0],
     ]
+    const total = rows.reduce((s, [, v]) => s + v, 0)
     return (
-      <section className="card calc">
-        <h3 className="sub-h">
-          <Calculator size={18} /> Move-in cost estimate
-        </h3>
-        <Rows rows={rows.filter(([, v]) => v > 0)} total={rows.reduce((s, [, v]) => s + v, 0)} totalLabel="Estimated total to move in" />
+      <Fold title="Move-in cost" icon={Calculator} hint={`≈ ${nairaCompact(total)}`}>
+        <Rows rows={rows.filter(([, v]) => v > 0)} total={total} totalLabel="Estimated total to move in" />
         <p className="muted small">Fees vary by agent. Always get a written breakdown before you pay.</p>
-      </section>
+      </Fold>
     )
   }
 
@@ -415,17 +388,14 @@ function CostCalculator({ l }: { l: Listing }) {
     const sub = l.price * plots
     const agency = (sub * (l.agentFee ?? 0)) / 100
     return (
-      <section className="card calc">
-        <h3 className="sub-h">
-          <Calculator size={18} /> Land cost estimate
-        </h3>
+      <Fold title="Land cost" icon={Calculator} hint={`≈ ${nairaCompact(sub + agency)}`}>
         <label className="calc-row">
           <span>Plots</span>
           <input type="number" min={1} max={l.plots ?? 50} value={plots} onChange={(e) => setPlots(Math.min(l.plots ?? 50, Math.max(1, Number(e.target.value) || 1)))} />
         </label>
         <Rows rows={[[`${naira(l.price)} × ${plots} plot${plots > 1 ? 's' : ''}`, sub], ...(agency ? ([[`Agency (${l.agentFee}%)`, agency]] as [string, number][]) : [])]} total={sub + agency} totalLabel="Estimated total" />
         <p className="muted small">Survey, documentation and development levies are usually extra.</p>
-      </section>
+      </Fold>
     )
   }
 
@@ -435,10 +405,7 @@ function CostCalculator({ l }: { l: Listing }) {
   const n = years * 12
   const monthly = r === 0 ? principal / n : (principal * r) / (1 - Math.pow(1 + r, -n))
   return (
-    <section className="card calc">
-      <h3 className="sub-h">
-        <Calculator size={18} /> Mortgage estimate
-      </h3>
+    <Fold title="Mortgage estimate" icon={Calculator} hint={`≈ ${nairaCompact(monthly)} / month`}>
       <div className="calc-sliders">
         <label>
           <span>
@@ -467,7 +434,7 @@ function CostCalculator({ l }: { l: Listing }) {
         </small>
       </div>
       <p className="muted small">Indicative only. NHF loans start around 6%; commercial mortgages are typically higher.</p>
-    </section>
+    </Fold>
   )
 }
 

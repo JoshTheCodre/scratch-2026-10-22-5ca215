@@ -39,6 +39,7 @@ interface Draft {
 }
 
 const STEPS = ['Category & location', 'Property details', 'Photos', 'Price & contact', 'Review']
+const LAND_FEATURES = ['Dry Land', 'Fenced', 'Gated Estate', 'Tarred Road', 'Electricity Available', 'Good Drainage', 'Corner Piece', 'Instant Allocation', 'Security']
 const DRAFT_KEY = 'h4r:v1:draft'
 
 const defaultUnit = (cat?: string): PriceUnit => {
@@ -109,11 +110,13 @@ export default function PostAd() {
   const [step, setStep] = useState(d.category ? 1 : 0)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
+  const [allFacilities, setAllFacilities] = useState(false)
 
   const cat = categoryBySlug(d.category)
   const city = cityBySlug(d.city)
   const isLand = cat?.group === 'land'
   const residential = cat?.group === 'residential'
+  const facilityOptions = isLand ? LAND_FEATURES : FACILITIES
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) =>
     setD((prev) => {
@@ -268,6 +271,9 @@ export default function PostAd() {
           </li>
         ))}
       </ol>
+      <p className="step-label">
+        Step {step + 1} of {STEPS.length} · <strong>{STEPS[step]}</strong>
+      </p>
 
       <div className="card sell-card">
         {step === 0 && (
@@ -280,15 +286,26 @@ export default function PostAd() {
                   <button
                     key={c.slug}
                     type="button"
-                    className={`cat-opt ${d.category === c.slug ? 'on' : ''}`}
+                    className={`cat-opt g-${c.group} ${d.category === c.slug ? 'on' : ''}`}
+                    aria-pressed={d.category === c.slug}
                     onClick={() => {
                       set('category', c.slug)
                       set('priceUnit', defaultUnit(c.slug))
                       if (!c.types.includes(d.propertyType)) set('propertyType', '')
                     }}
                   >
-                    <Icon size={24} />
-                    <strong>{c.name}</strong>
+                    <span className="cat-opt-icon">
+                      <Icon size={20} />
+                    </span>
+                    {d.category === c.slug && (
+                      <span className="cat-opt-check" aria-hidden>
+                        <Check size={12} strokeWidth={3} />
+                      </span>
+                    )}
+                    <strong>
+                      <span className="hide-sm">{c.name}</span>
+                      <span className="show-sm">{c.short}</span>
+                    </strong>
                     <small>{c.blurb}</small>
                   </button>
                 )
@@ -328,8 +345,8 @@ export default function PostAd() {
         {step === 1 && cat && (
           <div className="form">
             <h2>{cat.name} details</h2>
-            <label>
-              Property type
+            <div className="field">
+              <span className="field-label">Property type</span>
               <div className="chip-pick">
                 {cat.types.map((t) => (
                   <button type="button" key={t} className={`chip ${d.propertyType === t ? 'on' : ''}`} onClick={() => set('propertyType', t)}>
@@ -338,7 +355,7 @@ export default function PostAd() {
                 ))}
               </div>
               <Err k="propertyType" />
-            </label>
+            </div>
             <div className="form-row three">
               {residential && num('bedrooms', 'Bedrooms', 'e.g. 3')}
               {residential && num('bathrooms', 'Bathrooms', 'e.g. 3')}
@@ -348,7 +365,7 @@ export default function PostAd() {
               {num('sizeSqm', 'Size (sqm)', 'e.g. 465')}
             </div>
             {!isLand && (
-              <div className="form-row">
+              <div className="form-row pair">
                 <label>
                   Furnishing
                   <select value={d.furnishing} onChange={(e) => set('furnishing', e.target.value as Furnishing)}>
@@ -386,19 +403,26 @@ export default function PostAd() {
                 </label>
               </div>
             )}
-            <label>
-              {isLand ? 'Land features' : 'Facilities'}
+            <div className="field">
+              <span className="field-label">{isLand ? 'Land features' : 'Facilities'}</span>
               <div className="chip-pick">
-                {(isLand ? ['Dry Land', 'Fenced', 'Gated Estate', 'Tarred Road', 'Electricity Available', 'Good Drainage', 'Corner Piece', 'Instant Allocation', 'Security'] : FACILITIES).map((x) => {
-                  const on = d.facilities.includes(x)
-                  return (
-                    <button type="button" key={x} className={`chip ${on ? 'on' : ''}`} onClick={() => set('facilities', on ? d.facilities.filter((y) => y !== x) : [...d.facilities, x])}>
-                      {on && <Check size={13} />} {x}
-                    </button>
-                  )
-                })}
+                {facilityOptions
+                  .filter((x, i) => allFacilities || i < 8 || d.facilities.includes(x))
+                  .map((x) => {
+                    const on = d.facilities.includes(x)
+                    return (
+                      <button type="button" key={x} className={`chip ${on ? 'on' : ''}`} onClick={() => set('facilities', on ? d.facilities.filter((y) => y !== x) : [...d.facilities, x])}>
+                        {on && <Check size={13} />} {x}
+                      </button>
+                    )
+                  })}
               </div>
-            </label>
+              {facilityOptions.length > 8 && (
+                <button type="button" className="link-btn" onClick={() => setAllFacilities((v) => !v)}>
+                  {allFacilities ? 'Show fewer' : `Show all ${facilityOptions.length}`}
+                </button>
+              )}
+            </div>
             <label>
               Advert title
               <input value={d.title} maxLength={90} onChange={(e) => set('title', e.target.value)} placeholder={suggestedTitle || 'e.g. Newly built 3 bedroom flat in Woji'} />
@@ -457,7 +481,7 @@ export default function PostAd() {
         {step === 3 && cat && (
           <div className="form">
             <h2>Price & contact</h2>
-            <div className="form-row">
+            <div className="form-row pair">
               <label>
                 Price (₦)
                 <input inputMode="numeric" value={d.price ? Number(d.price).toLocaleString() : ''} onChange={(e) => set('price', e.target.value.replace(/\D/g, ''))} placeholder="e.g. 1,500,000" />

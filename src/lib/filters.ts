@@ -6,6 +6,20 @@ import { sellerById } from '../data/sellers'
 export type Sort = 'recommended' | 'newest' | 'price-asc' | 'price-desc'
 export type Posted = '' | '24h' | '7d' | '30d'
 
+export const SORT_OPTIONS: [Sort, string][] = [
+  ['recommended', 'Recommended'],
+  ['newest', 'Newest'],
+  ['price-asc', 'Lowest price'],
+  ['price-desc', 'Highest price'],
+]
+
+export const POSTED_OPTIONS: [Posted, string][] = [
+  ['', 'Any time'],
+  ['24h', 'Last 24 hours'],
+  ['7d', 'Last 7 days'],
+  ['30d', 'Last 30 days'],
+]
+
 export interface Filters {
   q: string
   area: string

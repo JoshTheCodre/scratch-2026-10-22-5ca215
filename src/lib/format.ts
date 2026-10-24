@@ -34,6 +34,18 @@ export function timeAgo(iso: string): string {
   return `${mo} month${mo > 1 ? 's' : ''} ago`
 }
 
+/** Compact time for lists, e.g. "now", "5m", "3h", "2d", "14 Oct". */
+export function shortAgo(iso: string): string {
+  const m = Math.floor(Math.max(0, Date.now() - new Date(iso).getTime()) / 60000)
+  if (m < 1) return 'now'
+  if (m < 60) return `${m}m`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h`
+  const d = Math.floor(h / 24)
+  if (d < 7) return `${d}d`
+  return new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })
+}
+
 export const slugify = (s: string) =>
   s
     .toLowerCase()

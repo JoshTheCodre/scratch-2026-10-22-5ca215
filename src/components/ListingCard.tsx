@@ -1,38 +1,34 @@
 import { Link } from 'react-router-dom'
-import { BedDouble, Bath, Camera, FileCheck2, LandPlot, MapPin, Ruler, Sofa } from 'lucide-react'
+import { BadgeCheck, MapPin } from 'lucide-react'
 import type { Listing } from '../types'
 import { sellerById } from '../data/sellers'
 import { cityName } from '../data/locations'
-import { listingPath, naira, timeAgo, unitLabel, yearsOn } from '../lib/format'
-import { Img, SaveButton, TierTag, VerifiedBadge } from './ui'
+import { listingPath, naira, timeAgo, unitLabel } from '../lib/format'
+import { Img, SaveButton } from './ui'
 
-export function listingAttrs(l: Listing) {
-  const out: { icon: typeof Ruler; text: string }[] = []
-  if (l.plots) out.push({ icon: LandPlot, text: `${l.plots} plot${l.plots > 1 ? 's' : ''}` })
-  if (l.sizeSqm) out.push({ icon: Ruler, text: `${l.sizeSqm.toLocaleString()} sqm` })
-  if (l.bedrooms) out.push({ icon: BedDouble, text: `${l.bedrooms} bed${l.bedrooms > 1 ? 's' : ''}` })
-  if (l.bathrooms && !l.plots) out.push({ icon: Bath, text: `${l.bathrooms} bath${l.bathrooms > 1 ? 's' : ''}` })
-  if (l.furnishing) out.push({ icon: Sofa, text: l.furnishing })
-  if (l.document && l.category.startsWith('land')) out.push({ icon: FileCheck2, text: l.document.replace(/ \(.*\)/, '') })
+/** Short facts for a card, e.g. "3 beds · 3 baths · 465 sqm". */
+export function listingFacts(l: Listing): string[] {
+  const out: string[] = []
+  if (l.bedrooms) out.push(`${l.bedrooms} bed${l.bedrooms > 1 ? 's' : ''}`)
+  if (l.bathrooms && !l.plots) out.push(`${l.bathrooms} bath${l.bathrooms > 1 ? 's' : ''}`)
+  if (l.plots) out.push(`${l.plots} plot${l.plots > 1 ? 's' : ''}`)
+  if (l.sizeSqm) out.push(`${l.sizeSqm.toLocaleString()} sqm`)
+  if (!l.bedrooms && !l.plots) out.push(l.propertyType)
+  if (l.document && l.category.startsWith('land')) out.push(l.document.replace(/ \(.*\)/, ''))
+  else if (l.furnishing && l.furnishing !== 'Unfurnished') out.push(l.furnishing)
   return out
 }
 
 export function ListingCard({ l, view = 'grid' }: { l: Listing; view?: 'grid' | 'list' }) {
   const seller = sellerById(l.sellerId)
-  const attrs = listingAttrs(l).slice(0, view === 'list' ? 5 : 3)
   const unit = unitLabel(l.priceUnit, l.category)
+  const facts = listingFacts(l).slice(0, view === 'list' ? 5 : 3)
+  const flag = l.isUserAd ? 'Your ad' : l.tier === 'featured' ? 'Featured' : null
   return (
-    <article className={`lcard lcard-${view} ${l.tier ? `is-${l.tier}` : ''}`}>
+    <article className={`lcard lcard-${view}`}>
       <div className="lcard-media">
-        <Img src={l.images[0]} alt={l.title} width={view === 'list' ? 420 : 520} />
-        <TierTag tier={l.tier} />
-        <div className="lcard-badges">
-          {l.isUserAd ? <span className="badge badge-years">Your ad</span> : <VerifiedBadge seller={seller} compact />}
-          {seller && seller.joinedYear <= new Date().getFullYear() - 3 && <span className="badge badge-years">{yearsOn(seller.joinedYear)}</span>}
-        </div>
-        <span className="lcard-count">
-          <Camera size={12} /> {l.images.length}
-        </span>
+        <Img src={l.images[0]} alt={l.title} width={view === 'list' ? 420 : 560} />
+        {flag && <span className="lcard-flag">{flag}</span>}
         <SaveButton id={l.id} />
       </div>
       <div className="lcard-body">
@@ -44,22 +40,16 @@ export function ListingCard({ l, view = 'grid' }: { l: Listing; view?: 'grid' | 
             {l.title}
           </Link>
         </h3>
-        <p className="lcard-desc">{l.description.split('\n')[0]}</p>
-        {attrs.length > 0 && (
-          <div className="lcard-attrs">
-            {attrs.map(({ icon: Icon, text }) => (
-              <span key={text}>
-                <Icon size={13} /> {text}
-              </span>
-            ))}
-          </div>
-        )}
-        <div className="lcard-foot">
-          <span className="lcard-loc">
-            <MapPin size={13} /> {l.area}, {cityName(l.city)}
+        {view === 'list' && <p className="lcard-desc">{l.description.split('\n')[0]}</p>}
+        {facts.length > 0 && <p className="lcard-facts">{facts.join(' · ')}</p>}
+        <p className="lcard-loc">
+          <MapPin size={13} />
+          <span>
+            {l.area}, {cityName(l.city)}
           </span>
-          <span className="muted">{timeAgo(l.postedAt)}</span>
-        </div>
+          {seller?.verified && <BadgeCheck size={15} className="lcard-verified" aria-label="Verified seller" />}
+          {view === 'list' && <span className="lcard-time">{timeAgo(l.postedAt)}</span>}
+        </p>
       </div>
     </article>
   )
