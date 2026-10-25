@@ -36,5 +36,5 @@ export function imgUrl(ref: string, width = 600): string {
 export const PLACEHOLDER =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#e6f1e2"/><path d="M150 170 200 128l50 42v52h-30v-34h-40v34h-30z" fill="#b6cfae"/></svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#e8edf6"/><path d="M150 170 200 128l50 42v52h-30v-34h-40v34h-30z" fill="#b8c3d9"/></svg>`,
   )
