@@ -5,32 +5,38 @@
    Swap the palette block to re-skin the whole site.
    ───────────────────────────────────────────────────────────── */
 :root {
-  /* Palette — warm paper, deep teal, coral */
-  --bg: #f7f4ee;
-  --bg-soft: #fbf9f5;
+  /* Palette — fresh greens: lime → bright → mid → deep green on clean white */
+  --lime-light: #b0f93a;
+  --lime: #86d31a;
+  --green-bright: #088a32;
+  --green-mid: #057228;
+  --green-deep: #04571c;
+
+  --bg: #f4f8f1;
+  --bg-soft: #f9fcf7;
   --card: #ffffff;
-  --ink: #17252b;
-  --ink-2: #43535a;
-  --muted: #5f6d72;
-  --line: #ebe5db;
-  --line-strong: #d8d0c3;
-  --hover: rgba(23, 37, 43, 0.06);
+  --ink: #0e2416;
+  --ink-2: #35503f;
+  --muted: #5b6f61;
+  --line: #e1ebdd;
+  --line-strong: #c9d8c4;
+  --hover: rgba(14, 36, 22, 0.06);
 
-  --brand: #0f6b66;
-  --brand-600: #0a5551;
-  --brand-50: #e5f1ee;
-  --brand-100: #cbe5e0;
+  --brand: var(--green-mid);
+  --brand-600: var(--green-deep);
+  --brand-50: #e8f5e3;
+  --brand-100: #cdebc2;
 
-  --accent: #ff7a59;
-  --accent-600: #f2603c;
-  --accent-50: #ffede6;
-  --accent-soft: #ffa58c;
-  --on-accent: #17252b;
+  --accent: var(--lime);
+  --accent-600: #73c805;
+  --accent-50: #f1fbe0;
+  --accent-soft: var(--lime-light);
+  --on-accent: #0b3a17;
 
-  --dark: #133a37;
-  --dark-2: #1c4b47;
-  --on-dark: #eaf2f0;
-  --on-dark-muted: #a9c2be;
+  --dark: var(--green-deep);
+  --dark-2: #046a21;
+  --on-dark: #eef8ea;
+  --on-dark-muted: #b5d3b0;
 
   --danger: #d64545;
   --gold: #f2a93b;
@@ -41,9 +47,9 @@
   --radius-lg: 28px;
   --radius: 18px;
   --radius-sm: 12px;
-  --shadow: 0 1px 2px rgba(23, 37, 43, 0.05);
-  --shadow-md: 0 8px 24px rgba(23, 37, 43, 0.07);
-  --shadow-lg: 0 20px 50px rgba(23, 37, 43, 0.18);
+  --shadow: 0 1px 2px rgba(14, 36, 22, 0.05);
+  --shadow-md: 0 8px 24px rgba(14, 36, 22, 0.07);
+  --shadow-lg: 0 20px 50px rgba(14, 36, 22, 0.18);
   --topbar-h: 68px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   color-scheme: light;
@@ -338,7 +344,7 @@ p {
   padding: 3px 10px;
   border-radius: 999px;
   background: var(--accent-50);
-  color: #a33a1e;
+  color: #3d6a06;
   font-size: 12px;
   font-weight: 600;
 }
@@ -364,7 +370,7 @@ p {
   padding: 3px 9px;
   border-radius: 999px;
   background: var(--accent-50);
-  color: #a33a1e;
+  color: #3d6a06;
 }
 .tier {
   display: inline-block;
@@ -373,7 +379,7 @@ p {
   font-size: 12px;
   font-weight: 600;
   background: var(--accent-50);
-  color: #a33a1e;
+  color: #3d6a06;
 }
 .avatar {
   display: inline-grid;
@@ -387,7 +393,7 @@ p {
 .stars {
   display: inline-flex;
   gap: 1px;
-  color: #d9d2c6;
+  color: #d4ddcf;
   vertical-align: -2px;
 }
 .stars .on {
@@ -434,7 +440,7 @@ p {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(247, 244, 238, 0.86);
+  background: rgba(244, 248, 241, 0.86);
   -webkit-backdrop-filter: saturate(160%) blur(14px);
   backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--line);
@@ -596,7 +602,7 @@ p {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 25, 28, 0.4);
+  background: rgba(8, 26, 14, 0.4);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
@@ -1468,7 +1474,7 @@ input.switch:checked::after {
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(15, 25, 28, 0.45);
+  background: rgba(8, 26, 14, 0.45);
   animation: fade 0.18s ease;
 }
 .modal {
@@ -1579,7 +1585,7 @@ input.switch:checked::after {
   animation: pop 0.24s var(--ease);
 }
 .toast-ok svg {
-  color: #7ee0b5;
+  color: #b0f93a;
 }
 .toast-warn svg {
   color: var(--accent-soft);
@@ -1666,8 +1672,8 @@ input.switch:checked::after {
   overflow: hidden;
   padding: 64px 56px 56px;
   border-radius: var(--radius-lg);
-  background: radial-gradient(700px 360px at 92% 0%, rgba(255, 122, 89, 0.28), transparent 65%),
-    radial-gradient(600px 300px at 0% 110%, rgba(15, 107, 102, 0.55), transparent 70%), var(--dark);
+  background: radial-gradient(700px 360px at 92% 0%, rgba(176, 249, 58, 0.18), transparent 65%),
+    radial-gradient(600px 300px at 0% 110%, rgba(8, 138, 50, 0.6), transparent 70%), var(--dark);
   color: var(--on-dark);
 }
 .hero h1 {
@@ -1778,16 +1784,16 @@ input.switch:checked::after {
   color: var(--brand);
 }
 .g-land .cat-icon {
-  background: #edf4e4;
-  color: #4b7a1a;
+  background: #eef9dc;
+  color: #4f8a07;
 }
 .g-commercial .cat-icon {
   background: var(--amber-50);
   color: #8a5300;
 }
 .g-venue .cat-icon {
-  background: var(--accent-50);
-  color: #b4441f;
+  background: #e0f1f3;
+  color: #0e6f7a;
 }
 .block {
   margin-top: 56px;
@@ -1820,7 +1826,7 @@ input.switch:checked::after {
 }
 .cta-band {
   /* Hand-drawn skyline in the site palette (inline SVG, no external asset). */
-  --cta-art: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'><circle cx='270' cy='40' r='18' fill='%23F2A93B' fill-opacity='.5'/><path d='M0 179h320' stroke='%230F6B66' stroke-opacity='.25' stroke-width='2'/><rect x='18' y='112' width='70' height='67' fill='%23FF7A59' fill-opacity='.18'/><path d='M8 118l45-38 45 38z' fill='%23FF7A59' fill-opacity='.5'/><rect x='44' y='142' width='18' height='37' rx='2' fill='%230F6B66' fill-opacity='.4'/><rect x='110' y='72' width='104' height='107' fill='%230F6B66' fill-opacity='.14'/><path d='M100 78l62-48 62 48z' fill='%230F6B66' fill-opacity='.6'/><rect x='128' y='92' width='22' height='22' rx='3' fill='%23fff'/><rect x='174' y='92' width='22' height='22' rx='3' fill='%23fff'/><rect x='128' y='130' width='22' height='22' rx='3' fill='%23fff'/><rect x='172' y='138' width='24' height='41' rx='3' fill='%23FF7A59' fill-opacity='.6'/><rect x='234' y='120' width='68' height='59' fill='%23F2A93B' fill-opacity='.22'/><path d='M226 124l42-32 42 32z' fill='%23F2A93B' fill-opacity='.6'/><rect x='258' y='140' width='20' height='18' rx='3' fill='%23fff'/><circle cx='96' cy='156' r='11' fill='%230F6B66' fill-opacity='.3'/><path d='M96 160v19' stroke='%230F6B66' stroke-opacity='.4' stroke-width='3'/></svg>");
+  --cta-art: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'><circle cx='270' cy='40' r='18' fill='%23B0F93A' fill-opacity='.5'/><path d='M0 179h320' stroke='%23057228' stroke-opacity='.25' stroke-width='2'/><rect x='18' y='112' width='70' height='67' fill='%2386D31A' fill-opacity='.18'/><path d='M8 118l45-38 45 38z' fill='%2386D31A' fill-opacity='.5'/><rect x='44' y='142' width='18' height='37' rx='2' fill='%23057228' fill-opacity='.4'/><rect x='110' y='72' width='104' height='107' fill='%23057228' fill-opacity='.14'/><path d='M100 78l62-48 62 48z' fill='%23057228' fill-opacity='.6'/><rect x='128' y='92' width='22' height='22' rx='3' fill='%23fff'/><rect x='174' y='92' width='22' height='22' rx='3' fill='%23fff'/><rect x='128' y='130' width='22' height='22' rx='3' fill='%23fff'/><rect x='172' y='138' width='24' height='41' rx='3' fill='%2386D31A' fill-opacity='.6'/><rect x='234' y='120' width='68' height='59' fill='%23B0F93A' fill-opacity='.22'/><path d='M226 124l42-32 42 32z' fill='%23B0F93A' fill-opacity='.6'/><rect x='258' y='140' width='20' height='18' rx='3' fill='%23fff'/><circle cx='96' cy='156' r='11' fill='%23057228' fill-opacity='.3'/><path d='M96 160v19' stroke='%23057228' stroke-opacity='.4' stroke-width='3'/></svg>");
   position: relative;
   overflow: hidden;
   margin-top: 56px;
@@ -1828,8 +1834,8 @@ input.switch:checked::after {
   border-radius: var(--radius-lg);
   background:
     var(--cta-art) right 48px bottom / auto 82% no-repeat,
-    radial-gradient(460px 240px at 100% 0%, rgba(242, 169, 59, 0.3), transparent 70%),
-    linear-gradient(115deg, #ffe9df 0%, #fff3e6 55%, #fdf0d9 100%);
+    radial-gradient(460px 240px at 100% 0%, rgba(176, 249, 58, 0.35), transparent 70%),
+    linear-gradient(115deg, #e9f7e1 0%, #f3fbe8 55%, #e2f4d3 100%);
 }
 .cta-copy {
   position: relative;
@@ -1893,30 +1899,30 @@ input.switch:checked::after {
 }
 .trust-item:nth-child(1) {
   background:
-    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect x='8' y='30' width='86' height='60' rx='11' fill='%230F6B66' fill-opacity='.12'/><circle cx='32' cy='55' r='10' fill='%230F6B66' fill-opacity='.35'/><path d='M20 78c3-9 21-9 24 0' stroke='%230F6B66' stroke-opacity='.35' stroke-width='4' fill='none' stroke-linecap='round'/><rect x='52' y='47' width='30' height='6' rx='3' fill='%230F6B66' fill-opacity='.3'/><rect x='52' y='59' width='22' height='6' rx='3' fill='%230F6B66' fill-opacity='.2'/><circle cx='90' cy='88' r='21' fill='%230F6B66' fill-opacity='.6'/><path d='M80 88l7 7 13-13' stroke='%23fff' stroke-width='4.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect x='8' y='30' width='86' height='60' rx='11' fill='%23057228' fill-opacity='.12'/><circle cx='32' cy='55' r='10' fill='%23057228' fill-opacity='.35'/><path d='M20 78c3-9 21-9 24 0' stroke='%23057228' stroke-opacity='.35' stroke-width='4' fill='none' stroke-linecap='round'/><rect x='52' y='47' width='30' height='6' rx='3' fill='%23057228' fill-opacity='.3'/><rect x='52' y='59' width='22' height='6' rx='3' fill='%23057228' fill-opacity='.2'/><circle cx='90' cy='88' r='21' fill='%23057228' fill-opacity='.6'/><path d='M80 88l7 7 13-13' stroke='%23fff' stroke-width='4.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>")
       right 14px bottom 10px / 112px no-repeat,
-    radial-gradient(220px 160px at 100% 100%, rgba(15, 107, 102, 0.14), transparent 70%),
-    linear-gradient(135deg, #eaf4f1 0%, #dcede8 100%);
+    radial-gradient(220px 160px at 100% 100%, rgba(5, 114, 40, 0.14), transparent 70%),
+    linear-gradient(135deg, #eaf6e6 0%, #d9eed2 100%);
 }
 .trust-item:nth-child(2) {
   background:
-    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect x='14' y='72' width='18' height='34' rx='5' fill='%23F2A93B' fill-opacity='.35'/><rect x='40' y='56' width='18' height='50' rx='5' fill='%23F2A93B' fill-opacity='.5'/><rect x='66' y='40' width='18' height='66' rx='5' fill='%23F2A93B' fill-opacity='.7'/><path d='M8 107h104' stroke='%238A5300' stroke-opacity='.25' stroke-width='3' stroke-linecap='round'/><path d='M14 60l26-16 26 6 32-28' stroke='%238A5300' stroke-opacity='.5' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='98' cy='22' r='7' fill='%238A5300' fill-opacity='.5'/></svg>")
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect x='14' y='72' width='18' height='34' rx='5' fill='%23B0F93A' fill-opacity='.35'/><rect x='40' y='56' width='18' height='50' rx='5' fill='%23B0F93A' fill-opacity='.5'/><rect x='66' y='40' width='18' height='66' rx='5' fill='%23B0F93A' fill-opacity='.7'/><path d='M8 107h104' stroke='%2304571C' stroke-opacity='.25' stroke-width='3' stroke-linecap='round'/><path d='M14 60l26-16 26 6 32-28' stroke='%2304571C' stroke-opacity='.5' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='98' cy='22' r='7' fill='%2304571C' fill-opacity='.5'/></svg>")
       right 14px bottom 8px / 112px no-repeat,
-    radial-gradient(220px 160px at 100% 100%, rgba(242, 169, 59, 0.22), transparent 70%),
-    linear-gradient(135deg, #fff6e6 0%, #fdebcc 100%);
+    radial-gradient(220px 160px at 100% 100%, rgba(134, 211, 26, 0.24), transparent 70%),
+    linear-gradient(135deg, #f6fce9 0%, #e7f6c8 100%);
 }
 .trust-item:nth-child(2) > svg {
-  color: #8a5300;
+  color: #4f7f06;
 }
 .trust-item:nth-child(3) {
   background:
-    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><path d='M60 10l38 15v27c0 28-17 47-38 56-21-9-38-28-38-56V25z' fill='%23FF7A59' fill-opacity='.2'/><path d='M60 24l27 11v19c0 20-12 34-27 41-15-7-27-21-27-41V35z' fill='%23FF7A59' fill-opacity='.4'/><path d='M45 61l15-12 15 12v16H45z' fill='%23fff'/><rect x='56' y='66' width='8' height='11' rx='2' fill='%23B4441F' fill-opacity='.65'/></svg>")
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><path d='M60 10l38 15v27c0 28-17 47-38 56-21-9-38-28-38-56V25z' fill='%2386D31A' fill-opacity='.2'/><path d='M60 24l27 11v19c0 20-12 34-27 41-15-7-27-21-27-41V35z' fill='%2386D31A' fill-opacity='.4'/><path d='M45 61l15-12 15 12v16H45z' fill='%23fff'/><rect x='56' y='66' width='8' height='11' rx='2' fill='%2304571C' fill-opacity='.65'/></svg>")
       right 14px bottom 6px / 112px no-repeat,
-    radial-gradient(220px 160px at 100% 100%, rgba(255, 122, 89, 0.18), transparent 70%),
-    linear-gradient(135deg, #fff0ea 0%, #ffe2d6 100%);
+    radial-gradient(220px 160px at 100% 100%, rgba(4, 87, 28, 0.16), transparent 70%),
+    linear-gradient(135deg, #eef6ec 0%, #d4e8cd 100%);
 }
 .trust-item:nth-child(3) > svg {
-  color: #b4441f;
+  color: #04571c;
 }
 
 /* ───────────────────────── Detail page ───────────────────────── */
@@ -2177,7 +2183,7 @@ input.switch:checked::after {
   right: 0;
   bottom: 0;
   height: 60px;
-  background: linear-gradient(rgba(247, 244, 238, 0), var(--bg));
+  background: linear-gradient(rgba(244, 248, 241, 0), var(--bg));
 }
 .description p {
   white-space: pre-line;
@@ -3398,7 +3404,7 @@ input[type='range'] {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     padding: 10px max(16px, calc((100vw - 640px) / 2)) calc(10px + env(safe-area-inset-bottom));
-    background: rgba(247, 244, 238, 0.92);
+    background: rgba(244, 248, 241, 0.92);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
     border-top: 1px solid var(--line);
@@ -3947,7 +3953,7 @@ input[type='range'] {
 .chat-body {
   /* Faint doodle of little houses — gives the chat a calm, branded backdrop. */
   background:
-    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'><g fill='none' stroke='%230F6B66' stroke-opacity='.08' stroke-width='1.6' stroke-linejoin='round'><path d='M9 30l11-9 11 9v11H9z'/><path d='M17 41v-6h6v6'/><path d='M46 66l8-6.5 8 6.5v8H46z'/></g><circle cx='58' cy='18' r='2.6' fill='%23FF7A59' fill-opacity='.14'/><circle cx='26' cy='62' r='2' fill='%230F6B66' fill-opacity='.1'/></svg>")
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'><g fill='none' stroke='%23057228' stroke-opacity='.08' stroke-width='1.6' stroke-linejoin='round'><path d='M9 30l11-9 11 9v11H9z'/><path d='M17 41v-6h6v6'/><path d='M46 66l8-6.5 8 6.5v8H46z'/></g><circle cx='58' cy='18' r='2.6' fill='%2386D31A' fill-opacity='.14'/><circle cx='26' cy='62' r='2' fill='%23057228' fill-opacity='.1'/></svg>")
       repeat,
     var(--bg-soft);
 }
@@ -4012,7 +4018,7 @@ input[type='range'] {
   font-weight: 600;
 }
 .chat-item.unread time {
-  color: var(--accent-600);
+  color: var(--brand);
   font-weight: 600;
 }
 
@@ -4163,16 +4169,16 @@ input[type='range'] {
 .cat-opt {
   --tint: var(--brand);
   --tint-bg: var(--brand-50);
-  --tint-soft: #f3f9f7;
+  --tint-soft: #f2f9ef;
   position: relative;
   border: 1.5px solid var(--line);
   background: linear-gradient(140deg, #ffffff 35%, var(--tint-soft) 100%);
   transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s var(--ease), background 0.18s;
 }
 .cat-opt.g-land {
-  --tint: #4b7a1a;
-  --tint-bg: #edf4e4;
-  --tint-soft: #f6faf0;
+  --tint: #4f8a07;
+  --tint-bg: #eef9dc;
+  --tint-soft: #f7fcee;
 }
 .cat-opt.g-commercial {
   --tint: #8a5300;
@@ -4180,9 +4186,9 @@ input[type='range'] {
   --tint-soft: #fff9ef;
 }
 .cat-opt.g-venue {
-  --tint: #b4441f;
-  --tint-bg: #ffe9e0;
-  --tint-soft: #fff5f1;
+  --tint: #0e6f7a;
+  --tint-bg: #e0f1f3;
+  --tint-soft: #f2f9fa;
 }
 .cat-opt-icon {
   display: grid;
@@ -4338,5 +4344,89 @@ input[type='range'] {
   }
   .cat-opt small {
     grid-area: blurb;
+  }
+}
+
+/* ───────────────────────── Geometric green art (modern style) ───────────────────────── */
+/* Layered 45° chevrons and diamonds in lime → green gradients with crisp white cuts. */
+.hero {
+  --geo: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 420'><path d='M268 0h152v152z' fill='%23088A32' fill-opacity='.32'/><path d='M190 0h78L134 134l134 134h-78L56 134z' fill='%23B0F93A' fill-opacity='.1'/><path d='M176 0h14L56 134l134 134h-14L42 134z' fill='%23fff' fill-opacity='.05'/><path d='M330 176l72 72-72 72-72-72z' fill='%23088A32' fill-opacity='.26' stroke='%23fff' stroke-opacity='.06' stroke-width='6'/><path d='M420 300v120H300z' fill='%23B0F93A' fill-opacity='.08'/><path d='M240 420l60-60 60 60z' fill='%23088A32' fill-opacity='.26'/><path d='M120 300l40 40-40 40-40-40z' fill='none' stroke='%23B0F93A' stroke-opacity='.1' stroke-width='3'/></svg>");
+  background:
+    var(--geo) right -30px center / auto 118% no-repeat,
+    radial-gradient(520px 320px at 0% 110%, rgba(8, 138, 50, 0.55), transparent 70%),
+    linear-gradient(135deg, var(--green-deep) 0%, #046a21 60%, var(--green-mid) 100%);
+}
+.hero > * {
+  position: relative;
+}
+.hero h1,
+.hero p {
+  max-width: 620px;
+}
+@media (max-width: 1024px) {
+  .hero {
+    background-size: auto 80%, auto, auto;
+    background-position: right -90px top -40px, 0 0, 0 0;
+  }
+}
+@media (max-width: 720px) {
+  .hero {
+    background-size: 210px auto, auto, auto;
+    background-position: right -70px top -60px, 0 0, 0 0;
+  }
+  .hero h1 {
+    padding-right: 36px;
+  }
+}
+
+.footer {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 220'><path d='M300 0v150L150 0z' fill='%23088A32' fill-opacity='.28'/><path d='M216 0h44L170 90l90 90h-44l-90-90z' fill='%23B0F93A' fill-opacity='.08'/><path d='M290 150l30 30-30 30-30-30z' fill='%23B0F93A' fill-opacity='.07'/></svg>")
+      right -10px top -10px / 300px auto no-repeat,
+    var(--dark);
+}
+
+/* Section titles get a small lime chevron mark. */
+.block-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.block-head h2::before {
+  content: '';
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, var(--lime-light), var(--green-bright));
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+/* Logo: lime → green gradient "4". */
+.logo-word b,
+.auth-logo .logo-word b {
+  background: linear-gradient(135deg, var(--lime) 0%, var(--green-bright) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.logo-tld {
+  color: var(--green-mid);
+}
+
+/* Lime buttons: a touch of depth so they read as the main action. */
+.btn-accent {
+  background: linear-gradient(135deg, var(--lime-light) -20%, var(--lime) 60%);
+  box-shadow: 0 2px 10px rgba(115, 200, 5, 0.25);
+}
+.btn-accent:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--lime) 0%, var(--accent-600) 100%);
+}
+@media (max-width: 720px) {
+  /* Keep the footer art above the links, not behind them. */
+  .footer {
+    padding-top: 112px;
+    background-size: 190px auto, auto;
+    background-position: right -24px top -14px, 0 0;
   }
 }
