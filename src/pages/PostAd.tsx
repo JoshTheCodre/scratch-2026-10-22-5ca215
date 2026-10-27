@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, ImagePlus, Trash2, Star } from 'lucide-react'
 import type { CategorySlug, Condition, Furnishing, Listing, PriceUnit } from '../types'
 import { CATEGORIES, CONDITIONS, FACILITIES, FURNISHING, LAND_DOCUMENTS, categoryBySlug } from '../data/categories'
-import { CITIES, cityBySlug } from '../data/locations'
+import { STATES, cityBySlug, stateBySlug, stateOfCity } from '../data/locations'
 import { useStore } from '../lib/store'
 import { listingPath, naira, slugify, unitLabel } from '../lib/format'
 import { CATEGORY_ICONS, Img } from '../components/ui'
@@ -312,29 +312,47 @@ export default function PostAd() {
               })}
             </div>
             <Err k="category" />
-            <div className="form-row">
+            <div className="form-row pair">
               <label>
-                City
+                State
+                <select
+                  value={stateOfCity(d.city)?.slug ?? ''}
+                  onChange={(e) => {
+                    const st = stateBySlug(e.target.value)
+                    if (!st) return
+                    set('city', st.cities[0]!)
+                    set('area', '')
+                  }}
+                >
+                  {STATES.map((s) => (
+                    <option key={s.slug} value={s.slug}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                City / town
                 <select value={d.city} onChange={(e) => (set('city', e.target.value), set('area', ''))}>
-                  {CITIES.map((c) => (
-                    <option key={c.slug} value={c.slug}>
-                      {c.name}, {c.state}
+                  {stateOfCity(d.city)?.cities.map((slug) => (
+                    <option key={slug} value={slug}>
+                      {cityBySlug(slug)?.name}
                     </option>
                   ))}
                 </select>
                 <Err k="city" />
               </label>
-              <label>
-                Area / neighbourhood
-                <select value={d.area} onChange={(e) => set('area', e.target.value)}>
-                  <option value="">Select area</option>
-                  {city?.areas.map((a) => (
-                    <option key={a}>{a}</option>
-                  ))}
-                </select>
-                <Err k="area" />
-              </label>
             </div>
+            <label>
+              Area / neighbourhood
+              <select value={d.area} onChange={(e) => set('area', e.target.value)}>
+                <option value="">Select area</option>
+                {city?.areas.map((a) => (
+                  <option key={a}>{a}</option>
+                ))}
+              </select>
+              <Err k="area" />
+            </label>
             <label>
               Street address <small className="muted">(optional — only shown as approximate)</small>
               <input value={d.address} onChange={(e) => set('address', e.target.value)} placeholder="e.g. 12 Okporo Road" />

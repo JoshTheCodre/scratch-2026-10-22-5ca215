@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Award, Search } from 'lucide-react'
 import { SELLERS } from '../data/sellers'
-import { CITIES, cityName } from '../data/locations'
+import { STATES, cityName, inPlace, stateBySlug, stateOfCity } from '../data/locations'
 import { useStore } from '../lib/store'
 import { countBy } from '../lib/filters'
 import { yearsOn } from '../lib/format'
@@ -16,8 +16,10 @@ export default function Agents() {
   const city = sp.get('city') ?? ''
   const adCounts = useMemo(() => countBy(listings.filter((l) => l.status === 'active'), (l) => l.sellerId), [listings])
   const agents = SELLERS.filter(
-    (s) => (!city || city === 'nigeria' || s.city === city) && (!verifiedOnly || s.verified) && s.name.toLowerCase().includes(q.toLowerCase()),
+    (s) => (!city || inPlace(s.city, city)) && (!verifiedOnly || s.verified) && s.name.toLowerCase().includes(q.toLowerCase()),
   ).sort((a, b) => Number(b.enterprise) - Number(a.enterprise) || b.rating - a.rating)
+  // The URL may carry a city or a state; the dropdown works at state level.
+  const stateValue = stateBySlug(city) ? city : stateOfCity(city)?.slug ?? ''
 
   return (
     <div className="container page-simple">
@@ -34,11 +36,11 @@ export default function Agents() {
           <Search size={16} />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search agents" />
         </label>
-        <select value={city} onChange={(e) => setSp(e.target.value ? { city: e.target.value } : {})} aria-label="City">
-          <option value="">All cities</option>
-          {CITIES.map((c) => (
-            <option key={c.slug} value={c.slug}>
-              {c.name}
+        <select value={stateValue} onChange={(e) => setSp(e.target.value ? { city: e.target.value } : {})} aria-label="State">
+          <option value="">All states</option>
+          {STATES.map((s) => (
+            <option key={s.slug} value={s.slug}>
+              {s.label}
             </option>
           ))}
         </select>

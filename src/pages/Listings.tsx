@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, LayoutGrid, List, SearchX, SlidersHorizontal, X } from 'lucide-react'
 import { ALL_CATEGORIES, CATEGORIES, categoryBySlug, isCategorySlug } from '../data/categories'
-import { ALL_CITIES, cityBySlug, cityName } from '../data/locations'
+import { ALL_CITIES, isPlace, placeName } from '../data/locations'
 import { useStore } from '../lib/store'
 import { applyFilters, PAGE_SIZE, parseFilters, POSTED_OPTIONS, scopeListings, SORT_OPTIONS, sortListings } from '../lib/filters'
 import { nairaCompact, plural } from '../lib/format'
@@ -14,7 +14,7 @@ import NotFound from './NotFound'
 
 export default function Listings() {
   const { city = '', category = '' } = useParams()
-  const valid = (city === ALL_CITIES || !!cityBySlug(city)) && (category === ALL_CATEGORIES || isCategorySlug(category))
+  const valid = isPlace(city) && (category === ALL_CATEGORIES || isCategorySlug(category))
   return valid ? <ListingsView key={`${city}/${category}`} city={city} category={category} /> : <NotFound />
 }
 
@@ -26,7 +26,7 @@ function ListingsView({ city, category }: { city: string; category: string }) {
   const [pickLoc, setPickLoc] = useState(false)
   const [mobileFilters, setMobileFilters] = useState(false)
   const cat = categoryBySlug(category)
-  const place = f.area ? `${f.area}, ${cityName(city)}` : cityName(city)
+  const place = f.area ? `${f.area}, ${placeName(city)}` : placeName(city)
 
   const cityPool = useMemo(() => scopeListings(listings, city, ALL_CATEGORIES), [listings, city])
   const catPool = useMemo(() => scopeListings(listings, ALL_CITIES, category), [listings, category])

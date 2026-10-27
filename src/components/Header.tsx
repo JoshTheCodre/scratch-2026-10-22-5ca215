@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router-dom'
 import { Award, Bookmark, ChevronDown, Heart, LayoutGrid, LogOut, Menu, MessageCircle, Plus, Search, TrendingUp, User, X } from 'lucide-react'
 import { ALL_CATEGORIES, CATEGORIES, categoryBySlug, isCategorySlug } from '../data/categories'
-import { ALL_CITIES, CITIES, DEFAULT_CITY, cityBySlug } from '../data/locations'
+import { ALL_CITIES, DEFAULT_CITY, POPULAR_CITIES, STATES, cityBySlug, isPlace } from '../data/locations'
 import { useStore } from '../lib/store'
 import { Avatar, CATEGORY_ICONS, Logo } from './ui'
 
@@ -11,7 +11,7 @@ export function useListingScope() {
   const m = useMatch('/:city/:category')
   const city = m?.params.city ?? ''
   const category = m?.params.category ?? ''
-  const valid = (city === ALL_CITIES || !!cityBySlug(city)) && (category === ALL_CATEGORIES || isCategorySlug(category))
+  const valid = isPlace(city) && (category === ALL_CATEGORIES || isCategorySlug(category))
   return valid ? { city, category } : null
 }
 
@@ -176,13 +176,16 @@ export function Header() {
               </Link>
             )
           })}
-          <p className="drawer-label">Cities</p>
+          <p className="drawer-label">Popular cities</p>
           <div className="drawer-chips">
-            {CITIES.map((c) => (
-              <Link key={c.slug} to={`/${c.slug}/${scope?.category ?? ALL_CATEGORIES}`} className="chip">
-                {c.name}
+            {POPULAR_CITIES.map((slug) => (
+              <Link key={slug} to={`/${slug}/${scope?.category ?? ALL_CATEGORIES}`} className="chip">
+                {cityBySlug(slug)?.name}
               </Link>
             ))}
+            <Link to="/states" className="chip chip-all">
+              All {STATES.length} states →
+            </Link>
           </div>
           <p className="drawer-label">Your account</p>
           <Link to="/saved" className="drawer-link">
@@ -227,12 +230,13 @@ export function Footer() {
           ))}
         </div>
         <div>
-          <h5>Cities</h5>
-          {CITIES.map((c) => (
-            <Link key={c.slug} to={`/${c.slug}/${ALL_CATEGORIES}`}>
-              Property in {c.name}
+          <h5>Locations</h5>
+          {POPULAR_CITIES.slice(0, 6).map((slug) => (
+            <Link key={slug} to={`/${slug}/${ALL_CATEGORIES}`}>
+              Property in {cityBySlug(slug)?.name}
             </Link>
           ))}
+          <Link to="/states">All 36 states &amp; FCT →</Link>
         </div>
         <div>
           <h5>For sellers</h5>

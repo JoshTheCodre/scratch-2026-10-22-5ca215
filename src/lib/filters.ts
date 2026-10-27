@@ -1,6 +1,6 @@
 import type { Listing } from '../types'
 import { ALL_CATEGORIES } from '../data/categories'
-import { ALL_CITIES } from '../data/locations'
+import { inPlace } from '../data/locations'
 import { sellerById } from '../data/sellers'
 
 export type Sort = 'recommended' | 'newest' | 'price-asc' | 'price-desc'
@@ -66,7 +66,7 @@ export function parseFilters(sp: URLSearchParams): Filters {
 /** Listings in a city + category, before any sidebar filters. */
 export function scopeListings(all: Listing[], city: string, category: string) {
   return all.filter(
-    (l) => l.status === 'active' && (city === ALL_CITIES || l.city === city) && (category === ALL_CATEGORIES || l.category === category),
+    (l) => l.status === 'active' && inPlace(l.city, city) && (category === ALL_CATEGORIES || l.category === category),
   )
 }
 

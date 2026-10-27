@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { TrendingUp } from 'lucide-react'
 import type { Listing } from '../types'
 import { ALL_CATEGORIES, CATEGORIES, categoryBySlug } from '../data/categories'
-import { ALL_CITIES, CITIES, cityName } from '../data/locations'
+import { ALL_CITIES, STATES, cityBySlug, cityName, inPlace } from '../data/locations'
 import { useStore } from '../lib/store'
 import { naira, nairaCompact, unitLabel } from '../lib/format'
 import { Breadcrumbs } from '../components/ui'
@@ -36,7 +36,7 @@ export default function PriceCheck() {
         (l) =>
           l.status === 'active' &&
           l.category === category &&
-          (city === ALL_CITIES || l.city === city) &&
+          inPlace(l.city, city) &&
           (!type || l.propertyType === type) &&
           (!beds || l.bedrooms === Number(beds)),
       ),
@@ -74,10 +74,15 @@ export default function PriceCheck() {
           City
           <select value={city} onChange={(e) => update('city', e.target.value)}>
             <option value={ALL_CITIES}>All Nigeria</option>
-            {CITIES.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.name}
-              </option>
+            {STATES.map((s) => (
+              <optgroup key={s.slug} label={s.label}>
+                <option value={s.slug}>All {s.label}</option>
+                {s.cities.map((slug) => (
+                  <option key={slug} value={slug}>
+                    {cityBySlug(slug)?.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>

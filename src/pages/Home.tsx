@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, BadgeCheck, MapPin, Search, ShieldCheck, TrendingUp } from 'lucide-react'
 import { ALL_CATEGORIES, CATEGORIES } from '../data/categories'
-import { ALL_CITIES, CITIES, DEFAULT_CITY, cityBySlug } from '../data/locations'
+import { ALL_CITIES, DEFAULT_CITY, STATES, cityBySlug, inPlace, placeName } from '../data/locations'
 import { useStore } from '../lib/store'
 import { countBy, sortListings } from '../lib/filters'
 import { ListingCard } from '../components/ListingCard'
@@ -14,7 +14,7 @@ export default function Home() {
   const [city, setCity] = useState(DEFAULT_CITY)
   const [q, setQ] = useState('')
   const active = useMemo(() => listings.filter((l) => l.status === 'active'), [listings])
-  const inCity = useMemo(() => active.filter((l) => city === ALL_CITIES || l.city === city), [active, city])
+  const inCity = useMemo(() => active.filter((l) => inPlace(l.city, city)), [active, city])
   const catCounts = useMemo(() => countBy(inCity, (l) => l.category), [inCity])
   const areaCounts = useMemo(() => countBy(inCity, (l) => l.area), [inCity])
   const topAreas = [...areaCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12)
@@ -29,7 +29,7 @@ export default function Home() {
     e.preventDefault()
     navigate(`/${city}/${ALL_CATEGORIES}${q.trim() ? `?q=${encodeURIComponent(q.trim())}` : ''}`)
   }
-  const cityLabel = city === ALL_CITIES ? 'Nigeria' : cityBySlug(city)?.name
+  const cityLabel = placeName(city)
 
   return (
     <div className="container home">
@@ -43,10 +43,15 @@ export default function Home() {
             <MapPin size={18} />
             <select value={city} onChange={(e) => setCity(e.target.value)} aria-label="City">
               <option value={ALL_CITIES}>All Nigeria</option>
-              {CITIES.map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.name}
-                </option>
+              {STATES.map((s) => (
+                <optgroup key={s.slug} label={s.label}>
+                  <option value={s.slug}>All {s.label}</option>
+                  {s.cities.map((slug) => (
+                    <option key={slug} value={slug}>
+                      {cityBySlug(slug)?.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>

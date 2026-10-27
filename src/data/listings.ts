@@ -1,5 +1,5 @@
-import type { CategorySlug, Condition, Furnishing, Listing, PriceUnit, Tier } from '../types'
-import { CITIES } from './locations'
+import type { CategorySlug, City, Condition, Furnishing, Listing, PriceUnit, Tier, Zone } from '../types'
+import { STATES, cityBySlug, stateOfCity } from './locations'
 import { POOLS } from './images'
 import { LAND_DOCUMENTS } from './categories'
 import { slugify } from '../lib/format'
@@ -30,13 +30,23 @@ function sample<T>(arr: readonly T[], n: number): T[] {
   return out
 }
 
-const CITY_MULT: Record<string, number> = { 'port-harcourt': 1, lagos: 1.65, abuja: 1.4, owerri: 0.6, uyo: 0.65 }
+// Rough price level relative to Port Harcourt; cities not listed use DEFAULT_MULT.
+const CITY_MULT: Record<string, number> = {
+  'port-harcourt': 1, lagos: 1.65, abuja: 1.4, owerri: 0.6, uyo: 0.65,
+  ikorodu: 0.85, karu: 0.8, gwagwalada: 0.7, ibadan: 0.75, 'benin-city': 0.75, enugu: 0.8, asaba: 0.75, warri: 0.75,
+  kano: 0.7, kaduna: 0.7, calabar: 0.7, abeokuta: 0.65, ota: 0.7, jos: 0.62, ilorin: 0.6, akure: 0.6, osogbo: 0.55,
+}
+const DEFAULT_MULT = 0.5
 const PREMIUM = ['GRA Phase 2', 'Old GRA', 'Peter Odili Road', 'Woji', 'Ikoyi', 'Lekki Phase 1', 'Victoria Island', 'Maitama', 'Asokoro', 'Guzape', 'New Owerri', 'Ewet Housing']
 const BUDGET = ['Choba', 'Oyigbo', 'Igwuruta', 'Mile 1', 'D-Line', 'Borokiri', 'Rumuokoro', 'Kubwa', 'Lugbe', 'Ajah', 'Ibeju-Lekki', 'Rukpokwu', 'Eneka']
 const areaMult = (area: string) => (PREMIUM.includes(area) ? 1.55 : BUDGET.includes(area) ? 0.72 : 1)
 
 const ESTATES = ['Palm View Estate', 'Royal Gardens Estate', 'Unity Estate', 'Cedar Court Estate', 'Silver Springs Estate', 'Golden Gate Estate', 'Harmony Estate', 'Rosewood Estate', 'Oakridge Estate', 'Bayview Estate']
 const STREETS = ['Okporo Road', 'Ikwerre Road', 'Stadium Road', 'Evo Road', 'Tombia Street', 'Sani Abacha Road', 'Rumuibekwe Road', 'Aba Road', 'Woji Road', 'Elelenwo Road', 'King Perekule Street', 'Odili Road', 'Tank Road', 'Igbo Etche Road']
+// Street names common to many Nigerian cities, used outside Port Harcourt.
+const GENERIC_STREETS = ['Airport Road', 'Station Road', 'Hospital Road', 'Market Road', 'Club Road', 'Stadium Road', 'Ahmadu Bello Way', 'Murtala Mohammed Way', 'Independence Avenue', 'New Layout Road', 'Government House Road', 'Old Garage Road']
+
+const ZONE_SELLER: Record<Zone, string> = { NW: 's17', NE: 's17', SW: 's18', SE: 's19', NC: 's20', SS: 's21' }
 
 const LAND_FEATURES = ['Dry Land', 'Fenced', 'Gated Estate', 'Tarred Road', 'Electricity Available', 'Good Drainage', 'Corner Piece', 'Instant Allocation', 'Security']
 const HOME_FACILITIES = ['24-hour Electricity', 'Borehole Water', 'Security', 'Gated Estate', 'Parking Space', 'POP Ceiling', 'Tiled Floor', 'Fitted Kitchen', 'Wardrobe', 'Air Conditioning', 'Prepaid Meter', 'Balcony', 'Inverter / Solar', 'CCTV']
@@ -49,6 +59,7 @@ function sellerFor(category: CategorySlug, city: string): string {
   if (city === 'abuja') return 's12'
   if (city === 'owerri') return 's13'
   if (city === 'uyo') return 's14'
+  if (city !== 'port-harcourt') return ZONE_SELLER[stateOfCity(city)?.zone ?? 'SS']
   if (category.startsWith('land')) return pick(['s3', 's3', 's3', 's1', 's5'])
   if (category.startsWith('commercial')) return pick(['s6', 's6', 's9'])
   if (category === 'short-let') return pick(['s7', 's2', 's7'])
@@ -389,24 +400,22 @@ const CATEGORY_COUNTS: [CategorySlug, number][] = [
   ['event-centres-venues', 8],
 ]
 
+// The original five launch cities, named explicitly so their seeded adverts never change.
+const LAUNCH_CITIES = ['port-harcourt', 'lagos', 'abuja', 'owerri', 'uyo']
+const [PH, LAGOS, ABUJA, OWERRI, UYO] = LAUNCH_CITIES.map((s) => cityBySlug(s)!)
+
 function pickCity() {
   const r = rand()
-  if (r < 0.66) return CITIES[0]!
-  if (r < 0.79) return CITIES[1]!
-  if (r < 0.91) return CITIES[2]!
-  if (r < 0.96) return CITIES[3]!
-  return CITIES[4]!
+  if (r < 0.66) return PH!
+  if (r < 0.79) return LAGOS!
+  if (r < 0.91) return ABUJA!
+  if (r < 0.96) return OWERRI!
+  return UYO!
 }
 
-function generate(): Listing[] {
-  const out: Listing[] = []
-  const now = Date.now()
-  let i = 0
-  for (const [cat, count] of CATEGORY_COUNTS) {
-    for (let k = 0; k < count; k++, i++) {
-      const city = cat === 'event-centres-venues' ? (chance(0.8) ? CITIES[0]! : pickCity()) : pickCity()
+function makeListing(cat: CategorySlug, city: City, i: number, now: number): Listing {
       const area = pick(city.areas)
-      const mult = (CITY_MULT[city.slug] ?? 1) * areaMult(area)
+      const mult = (CITY_MULT[city.slug] ?? DEFAULT_MULT) * areaMult(area)
       let d: Draft
       let kind: Parameters<typeof photos>[0]
       switch (cat) {
@@ -447,15 +456,14 @@ function generate(): Listing[] {
       const hoursAgo = Math.floor(Math.pow(rand(), 2.2) * 24 * 75) + 1
       const tierRoll = rand()
       const tier: Tier | undefined = tierRoll < 0.1 ? 'featured' : tierRoll < 0.18 ? 'top' : tierRoll < 0.25 ? 'boost' : undefined
-      const id = `p${1000 + i}`
-      out.push({
+      return {
         ...d,
-        id,
+        id: `p${1000 + i}`,
         slug: slugify(d.title),
         negotiable: chance(0.55),
         city: city.slug,
         area,
-        address: d.category.startsWith('land') ? undefined : `${int(2, 48)} ${pick(STREETS)}, ${area}`,
+        address: d.category.startsWith('land') ? undefined : `${int(2, 48)} ${pick(city.slug === 'port-harcourt' ? STREETS : GENERIC_STREETS)}, ${area}`,
         facilities: d.facilities ?? [],
         images: photos(kind, i),
         sellerId: sellerFor(cat, city.slug),
@@ -465,8 +473,28 @@ function generate(): Listing[] {
         status: 'active',
         lat: city.lat + between(-0.05, 0.05),
         lng: city.lng + between(-0.05, 0.05),
-      })
+      }
+}
+
+// Every other city gets a few adverts so no state is empty: 4 in each capital, 2 elsewhere.
+const CAPITAL_MIX: CategorySlug[] = ['houses-apartments-for-rent', 'land-plots-for-sale', 'houses-apartments-for-sale', 'short-let']
+const TOWN_MIX: CategorySlug[] = ['houses-apartments-for-rent', 'land-plots-for-sale']
+
+function generate(): Listing[] {
+  const out: Listing[] = []
+  const now = Date.now()
+  let i = 0
+  for (const [cat, count] of CATEGORY_COUNTS) {
+    for (let k = 0; k < count; k++, i++) {
+      const city = cat === 'event-centres-venues' ? (chance(0.8) ? PH! : pickCity()) : pickCity()
+      out.push(makeListing(cat, city, i, now))
     }
+  }
+  for (const st of STATES) {
+    st.cities.forEach((slug, idx) => {
+      if (LAUNCH_CITIES.includes(slug)) return
+      for (const cat of idx === 0 ? CAPITAL_MIX : TOWN_MIX) out.push(makeListing(cat, cityBySlug(slug)!, i++, now))
+    })
   }
   return out
 }

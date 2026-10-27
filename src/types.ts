@@ -30,10 +30,25 @@ export type Condition = 'Newly-Built' | 'Renovated' | 'Fairly Used' | 'Off-Plan'
 export interface City {
   slug: string
   name: string
+  /** State name, e.g. "Rivers" or "FCT". */
   state: string
+  stateSlug: string
   lat: number
   lng: number
   areas: string[]
+}
+
+/** Nigeria's six geopolitical zones. */
+export type Zone = 'NC' | 'NE' | 'NW' | 'SE' | 'SS' | 'SW'
+
+export interface NgState {
+  slug: string
+  name: string
+  /** Display label, e.g. "Kano State" or "Abuja (FCT)". */
+  label: string
+  zone: Zone
+  /** City slugs, capital first. */
+  cities: string[]
 }
 
 export type SellerType = 'Agent' | 'Developer' | 'Owner' | 'Company'

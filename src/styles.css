@@ -5,51 +5,61 @@
    Swap the palette block to re-skin the whole site.
    ───────────────────────────────────────────────────────────── */
 :root {
-  /* Palette — crisp navy & gold (base = blues, pop = golds) on cool white */
+  /* Palette — the exact colours from the reference image, no adjustments.
+     Navy/blues: #0B2148 #152B59 #193368 #1C3973 #1F3E7D #254481 #294F98
+     Golds: #FCBB06 #FFC20F #FCDA16 #F7E480 · Slate: #576A7D · White: #FFFFFF
+     Softer fills use these same colours with transparency — never new shades. */
   --pop-light: #fcda16;
   --pop: #fcbb06;
-  --base-bright: #294f98;
-  --base: #254481;
+  --pop-mid: #ffc20f;
+  --pop-pale: #f7e480;
+  --base-darkest: #0b2148;
   --base-deep: #152b59;
+  --base-navy: #193368;
+  --base-navy-2: #1c3973;
+  --base-blue: #1f3e7d;
+  --base: #254481;
+  --base-bright: #294f98;
+  --slate: #576a7d;
 
-  --bg: #f5f7fb;
-  --bg-soft: #fafbfd;
+  --bg: #ffffff;
+  --bg-soft: rgba(37, 68, 129, 0.05);
   --card: #ffffff;
-  --ink: #0f1d3a;
-  --ink-2: #36435e;
-  --muted: #5a6478;
-  --line: #e2e7f0;
-  --line-strong: #c8d0df;
-  --hover: rgba(15, 29, 58, 0.06);
+  --ink: var(--base-darkest);
+  --ink-2: var(--base-deep);
+  --muted: var(--slate);
+  --line: rgba(87, 106, 125, 0.22);
+  --line-strong: rgba(87, 106, 125, 0.4);
+  --hover: rgba(37, 68, 129, 0.07);
 
   --brand: var(--base);
   --brand-600: var(--base-deep);
-  --brand-50: #e9eef8;
-  --brand-100: #ccd8ee;
+  --brand-50: rgba(37, 68, 129, 0.08);
+  --brand-100: rgba(37, 68, 129, 0.16);
 
   --accent: var(--pop);
-  --accent-600: #eaa800;
-  --accent-50: #fff6d6;
+  --accent-600: var(--pop-mid);
+  --accent-50: var(--pop-pale);
   --accent-soft: var(--pop-light);
-  --on-accent: #152b59;
+  --on-accent: var(--base-deep);
 
   --dark: var(--base-deep);
-  --dark-2: #1c3973;
-  --on-dark: #eef2fa;
-  --on-dark-muted: #b4c0d9;
+  --dark-2: var(--base-navy-2);
+  --on-dark: #ffffff;
+  --on-dark-muted: rgba(255, 255, 255, 0.82);
 
   --danger: #d64545;
-  --gold: #f2a93b;
-  --blue: #2f6fd6;
-  --blue-50: #eaf1fc;
-  --amber-50: #fff3df;
+  --gold: var(--pop);
+  --blue: var(--base-bright);
+  --blue-50: rgba(41, 79, 152, 0.1);
+  --amber-50: var(--pop-pale);
 
   --radius-lg: 28px;
   --radius: 18px;
   --radius-sm: 12px;
-  --shadow: 0 1px 2px rgba(15, 29, 58, 0.05);
-  --shadow-md: 0 8px 24px rgba(15, 29, 58, 0.07);
-  --shadow-lg: 0 20px 50px rgba(15, 29, 58, 0.18);
+  --shadow: 0 1px 2px rgba(11, 33, 72, 0.05);
+  --shadow-md: 0 8px 24px rgba(11, 33, 72, 0.07);
+  --shadow-lg: 0 20px 50px rgba(11, 33, 72, 0.18);
   --topbar-h: 68px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   color-scheme: light;
@@ -344,7 +354,7 @@ p {
   padding: 3px 10px;
   border-radius: 999px;
   background: var(--accent-50);
-  color: #7a5300;
+  color: var(--base-deep);
   font-size: 12px;
   font-weight: 600;
 }
@@ -370,7 +380,7 @@ p {
   padding: 3px 9px;
   border-radius: 999px;
   background: var(--accent-50);
-  color: #7a5300;
+  color: var(--base-deep);
 }
 .tier {
   display: inline-block;
@@ -379,7 +389,7 @@ p {
   font-size: 12px;
   font-weight: 600;
   background: var(--accent-50);
-  color: #7a5300;
+  color: var(--base-deep);
 }
 .avatar {
   display: inline-grid;
@@ -393,7 +403,7 @@ p {
 .stars {
   display: inline-flex;
   gap: 1px;
-  color: #d5dbe6;
+  color: rgba(87, 106, 125, 0.3);
   vertical-align: -2px;
 }
 .stars .on {
@@ -432,7 +442,7 @@ p {
 }
 .notice.warn {
   background: var(--amber-50);
-  color: #7a4a00;
+  color: var(--base-deep);
 }
 
 /* ───────────────────────── Header ───────────────────────── */
@@ -440,7 +450,7 @@ p {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(245, 247, 251, 0.86);
+  background: rgba(255, 255, 255, 0.86);
   -webkit-backdrop-filter: saturate(160%) blur(14px);
   backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--line);
@@ -602,7 +612,7 @@ p {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(8, 16, 36, 0.4);
+  background: rgba(11, 33, 72, 0.4);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
@@ -1365,7 +1375,7 @@ input.switch::after {
   height: 20px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(11, 33, 72, 0.2);
   transition: transform 0.2s var(--ease);
 }
 input.switch:checked {
@@ -1474,7 +1484,7 @@ input.switch:checked::after {
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(8, 16, 36, 0.45);
+  background: rgba(11, 33, 72, 0.45);
   animation: fade 0.18s ease;
 }
 .modal {
@@ -1702,7 +1712,7 @@ input.switch:checked::after {
   padding: 12px;
   background: var(--card);
   border-radius: 999px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 30px rgba(11, 33, 72, 0.18);
 }
 .hs-city,
 .hs-q {
@@ -1784,16 +1794,16 @@ input.switch:checked::after {
   color: var(--brand);
 }
 .g-land .cat-icon {
-  background: #e2f4ec;
-  color: #1e7a5a;
+  background: var(--pop-pale);
+  color: var(--base-deep);
 }
 .g-commercial .cat-icon {
   background: var(--amber-50);
-  color: #8a5300;
+  color: var(--base-deep);
 }
 .g-venue .cat-icon {
-  background: #eee9fa;
-  color: #5b3fa6;
+  background: rgba(41, 79, 152, 0.12);
+  color: var(--base-bright);
 }
 .block {
   margin-top: 56px;
@@ -1835,7 +1845,7 @@ input.switch:checked::after {
   background:
     var(--cta-art) right 48px bottom / auto 82% no-repeat,
     radial-gradient(460px 240px at 100% 0%, rgba(252, 187, 6, 0.28), transparent 70%),
-    linear-gradient(115deg, #fff4d1 0%, #fffaf0 55%, #e7edf9 100%);
+    linear-gradient(115deg, #ffffff 0%, #ffffff 55%, #ffffff 100%);
 }
 .cta-copy {
   position: relative;
@@ -1902,24 +1912,24 @@ input.switch:checked::after {
     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect x='8' y='30' width='86' height='60' rx='11' fill='%23254481' fill-opacity='.12'/><circle cx='32' cy='55' r='10' fill='%23254481' fill-opacity='.35'/><path d='M20 78c3-9 21-9 24 0' stroke='%23254481' stroke-opacity='.35' stroke-width='4' fill='none' stroke-linecap='round'/><rect x='52' y='47' width='30' height='6' rx='3' fill='%23254481' fill-opacity='.3'/><rect x='52' y='59' width='22' height='6' rx='3' fill='%23254481' fill-opacity='.2'/><circle cx='90' cy='88' r='21' fill='%23254481' fill-opacity='.6'/><path d='M80 88l7 7 13-13' stroke='%23fff' stroke-width='4.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>")
       right 14px bottom 10px / 112px no-repeat,
     radial-gradient(220px 160px at 100% 100%, rgba(37, 68, 129, 0.14), transparent 70%),
-    linear-gradient(135deg, #edf1fa 0%, #dbe4f5 100%);
+    linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
 }
 .trust-item:nth-child(2) {
   background:
     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect x='14' y='72' width='18' height='34' rx='5' fill='%23FCDA16' fill-opacity='.35'/><rect x='40' y='56' width='18' height='50' rx='5' fill='%23FCDA16' fill-opacity='.5'/><rect x='66' y='40' width='18' height='66' rx='5' fill='%23FCDA16' fill-opacity='.7'/><path d='M8 107h104' stroke='%23152B59' stroke-opacity='.25' stroke-width='3' stroke-linecap='round'/><path d='M14 60l26-16 26 6 32-28' stroke='%23152B59' stroke-opacity='.5' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='98' cy='22' r='7' fill='%23152B59' fill-opacity='.5'/></svg>")
       right 14px bottom 8px / 112px no-repeat,
     radial-gradient(220px 160px at 100% 100%, rgba(252, 187, 6, 0.22), transparent 70%),
-    linear-gradient(135deg, #fffaeb 0%, #ffefbf 100%);
+    linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
 }
 .trust-item:nth-child(2) > svg {
-  color: #8a5f00;
+  color: var(--base-deep);
 }
 .trust-item:nth-child(3) {
   background:
     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><path d='M60 10l38 15v27c0 28-17 47-38 56-21-9-38-28-38-56V25z' fill='%23FCBB06' fill-opacity='.2'/><path d='M60 24l27 11v19c0 20-12 34-27 41-15-7-27-21-27-41V35z' fill='%23FCBB06' fill-opacity='.4'/><path d='M45 61l15-12 15 12v16H45z' fill='%23fff'/><rect x='56' y='66' width='8' height='11' rx='2' fill='%23152B59' fill-opacity='.65'/></svg>")
       right 14px bottom 6px / 112px no-repeat,
     radial-gradient(220px 160px at 100% 100%, rgba(21, 43, 89, 0.14), transparent 70%),
-    linear-gradient(135deg, #eef0f6 0%, #d8deeb 100%);
+    linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
 }
 .trust-item:nth-child(3) > svg {
   color: #152b59;
@@ -1971,7 +1981,7 @@ input.switch:checked::after {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.92);
   color: var(--ink);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(11, 33, 72, 0.12);
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -2047,7 +2057,7 @@ input.switch:checked::after {
   z-index: 95;
   display: flex;
   flex-direction: column;
-  background: rgba(10, 18, 20, 0.96);
+  background: rgba(11, 33, 72, 0.96);
   color: #fff;
 }
 .lightbox-top {
@@ -2183,7 +2193,7 @@ input.switch:checked::after {
   right: 0;
   bottom: 0;
   height: 60px;
-  background: linear-gradient(rgba(245, 247, 251, 0), var(--bg));
+  background: linear-gradient(rgba(255, 255, 255, 0), var(--bg));
 }
 .description p {
   white-space: pre-line;
@@ -3404,7 +3414,7 @@ input[type='range'] {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     padding: 10px max(16px, calc((100vw - 640px) / 2)) calc(10px + env(safe-area-inset-bottom));
-    background: rgba(245, 247, 251, 0.92);
+    background: rgba(255, 255, 255, 0.92);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
     border-top: 1px solid var(--line);
@@ -4169,26 +4179,26 @@ input[type='range'] {
 .cat-opt {
   --tint: var(--brand);
   --tint-bg: var(--brand-50);
-  --tint-soft: #f3f6fc;
+  --tint-soft: #ffffff;
   position: relative;
   border: 1.5px solid var(--line);
   background: linear-gradient(140deg, #ffffff 35%, var(--tint-soft) 100%);
   transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s var(--ease), background 0.18s;
 }
 .cat-opt.g-land {
-  --tint: #1e7a5a;
-  --tint-bg: #e2f4ec;
-  --tint-soft: #f3faf7;
+  --tint: var(--base-deep);
+  --tint-bg: var(--pop-pale);
+  --tint-soft: #ffffff;
 }
 .cat-opt.g-commercial {
-  --tint: #8a5300;
-  --tint-bg: #fff1d9;
-  --tint-soft: #fff9ef;
+  --tint: var(--base-deep);
+  --tint-bg: rgba(21, 43, 89, 0.1);
+  --tint-soft: #ffffff;
 }
 .cat-opt.g-venue {
-  --tint: #5b3fa6;
-  --tint-bg: #eee9fa;
-  --tint-soft: #f8f6fd;
+  --tint: var(--base-bright);
+  --tint-bg: rgba(41, 79, 152, 0.12);
+  --tint-soft: #ffffff;
 }
 .cat-opt-icon {
   display: grid;
@@ -4405,7 +4415,7 @@ input[type='range'] {
 /* Logo: gold gradient "4". */
 .logo-word b,
 .auth-logo .logo-word b {
-  background: linear-gradient(135deg, var(--pop) 0%, #e89b00 100%);
+  background: linear-gradient(135deg, var(--pop) 0%, var(--pop-mid) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -4417,7 +4427,7 @@ input[type='range'] {
 /* Gold buttons: a touch of depth so they read as the main action. */
 .btn-accent {
   background: linear-gradient(135deg, var(--pop-light) -20%, var(--pop) 60%);
-  box-shadow: 0 2px 10px rgba(234, 168, 0, 0.3);
+  box-shadow: 0 2px 10px rgba(252, 187, 6, 0.3);
 }
 .btn-accent:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--pop) 0%, var(--accent-600) 100%);
@@ -4429,4 +4439,282 @@ input[type='range'] {
     background-size: 190px auto, auto;
     background-position: right -24px top -14px, 0 0;
   }
+}
+
+/* ═══════════════ Exact image palette: structure, art and accents ═══════════════
+   Every colour below is one of the reference image's own colours (optionally with
+   transparency). Gradients only blend between those colours, as the image does. */
+
+/* White page like the image: panels get a fine slate border instead of a tinted page. */
+.card,
+.cat-tile,
+.filters,
+.key-fact,
+.side-card,
+.chat-shell,
+.empty,
+.calc-rows,
+.trust-item,
+.tabs,
+.safety,
+.lcard-list,
+.drawer-user {
+  border: 1px solid var(--line);
+}
+.badge-years,
+.photo,
+.review-list li {
+  background: var(--bg-soft);
+}
+.dropdown a:hover,
+.dropdown button:hover,
+.fcat:hover,
+.loc-list button:hover,
+.price-check-link:hover,
+.drawer-link:hover,
+.ftools a:hover {
+  background: var(--hover);
+}
+.topbar {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Hero: navy to deep-blue gradient with the image geometry. Navy shapes keep it a calm
+   backdrop; one thin gold chevron and a navy-to-royal diamond echo the reference. */
+.hero {
+  --geo: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 420'><defs><linearGradient id='n' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%230B2148'/><stop offset='1' stop-color='%23294F98'/></linearGradient></defs><path d='M268 0h152v152z' fill='%231C3973'/><path d='M190 0h78L134 134l134 134h-78L56 134z' fill='%23193368'/><path d='M228 0h18L112 134l134 134h-18L94 134z' fill='%23FCBB06'/><path d='M330 176l72 72-72 72-72-72z' fill='url(%23n)'/><path d='M420 300v120H300z' fill='%231F3E7D'/><path d='M240 420l60-60 60 60z' fill='%23254481'/></svg>");
+  background:
+    var(--geo) right -30px center / auto 118% no-repeat,
+    linear-gradient(135deg, var(--base-deep) 0%, var(--base-navy) 100%);
+}
+
+.footer {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 220'><path d='M300 0v150L150 0z' fill='%231C3973'/><path d='M216 0h44L170 90l90 90h-44l-90-90z' fill='%23193368'/><path d='M234 0h14L158 90l90 90h-14l-90-90z' fill='%23FCBB06'/><path d='M290 150l30 30-30 30-30-30z' fill='%23254481'/></svg>")
+      right -10px top -10px / 300px auto no-repeat,
+    var(--base-deep);
+}
+.footer-grid a {
+  color: var(--on-dark-muted);
+}
+
+/* Let-or-sell banner: a bold gold band (yellow to gold like the image), navy text and
+   button, skyline drawn in the image navy, blue and gold. */
+.cta-band {
+  --cta-art: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'><circle cx='270' cy='40' r='18' fill='%23fff'/><path d='M0 179h320' stroke='%23152B59' stroke-width='2'/><rect x='18' y='112' width='70' height='67' fill='%23294F98'/><path d='M8 118l45-38 45 38z' fill='%23152B59'/><rect x='44' y='142' width='18' height='37' rx='2' fill='%23FCDA16'/><rect x='110' y='72' width='104' height='107' fill='%23254481'/><path d='M100 78l62-48 62 48z' fill='%230B2148'/><rect x='128' y='92' width='22' height='22' rx='3' fill='%23fff'/><rect x='174' y='92' width='22' height='22' rx='3' fill='%23fff'/><rect x='128' y='130' width='22' height='22' rx='3' fill='%23fff'/><rect x='172' y='138' width='24' height='41' rx='3' fill='%23FCDA16'/><rect x='234' y='120' width='68' height='59' fill='%231F3E7D'/><path d='M226 124l42-32 42 32z' fill='%23152B59'/><rect x='258' y='140' width='20' height='18' rx='3' fill='%23fff'/><circle cx='96' cy='156' r='11' fill='%23152B59'/><path d='M96 160v19' stroke='%23152B59' stroke-width='3'/></svg>");
+  background:
+    var(--cta-art) right 48px bottom / auto 82% no-repeat,
+    linear-gradient(135deg, var(--pop-light) 0%, var(--pop) 65%);
+  border: 0;
+}
+.cta-band h2,
+.cta-band p {
+  color: var(--base-deep);
+}
+.cta-band .btn-accent {
+  background: var(--base-deep);
+  color: #fff;
+  box-shadow: none;
+}
+.cta-band .btn-accent:hover:not(:disabled) {
+  background: var(--base-darkest);
+}
+
+/* Trust cards: white cards, solid icon tiles and drawings in the image colours. */
+.trust-item > svg {
+  background: var(--base);
+  color: #fff;
+}
+.trust-item:nth-child(1) {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect x='8' y='30' width='86' height='60' rx='11' fill='%23fff' stroke='%23254481' stroke-width='3'/><circle cx='32' cy='55' r='10' fill='%23254481'/><path d='M20 78c3-9 21-9 24 0' stroke='%23254481' stroke-width='4' fill='none' stroke-linecap='round'/><rect x='52' y='47' width='30' height='6' rx='3' fill='%23576A7D'/><rect x='52' y='59' width='22' height='6' rx='3' fill='%23576A7D'/><circle cx='90' cy='88' r='21' fill='%23FCBB06'/><path d='M80 88l7 7 13-13' stroke='%23152B59' stroke-width='4.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+      right 14px bottom 10px / 112px no-repeat,
+    #fff;
+}
+.trust-item:nth-child(2) {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect x='14' y='72' width='18' height='34' rx='5' fill='%23FCDA16'/><rect x='40' y='56' width='18' height='50' rx='5' fill='%23FFC20F'/><rect x='66' y='40' width='18' height='66' rx='5' fill='%23FCBB06'/><path d='M8 107h104' stroke='%23576A7D' stroke-width='3' stroke-linecap='round'/><path d='M14 60l26-16 26 6 32-28' stroke='%23152B59' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='98' cy='22' r='7' fill='%23152B59'/></svg>")
+      right 14px bottom 8px / 112px no-repeat,
+    #fff;
+}
+.trust-item:nth-child(2) > svg {
+  background: var(--pop);
+  color: var(--base-deep);
+}
+.trust-item:nth-child(3) {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><path d='M60 10l38 15v27c0 28-17 47-38 56-21-9-38-28-38-56V25z' fill='%23152B59'/><path d='M60 24l27 11v19c0 20-12 34-27 41-15-7-27-21-27-41V35z' fill='%23254481'/><path d='M45 61l15-12 15 12v16H45z' fill='%23fff'/><rect x='56' y='66' width='8' height='11' rx='2' fill='%23FCBB06'/></svg>")
+      right 14px bottom 6px / 112px no-repeat,
+    #fff;
+}
+.trust-item:nth-child(3) > svg {
+  background: var(--base-deep);
+  color: #fff;
+}
+
+/* Category colours: homes blue, land gold, commercial navy, venues royal blue. */
+.cat-icon {
+  background: var(--brand-50);
+  color: var(--base);
+}
+.g-land .cat-icon {
+  background: var(--pop-pale);
+  color: var(--base-deep);
+}
+.g-commercial .cat-icon {
+  background: rgba(21, 43, 89, 0.1);
+  color: var(--base-deep);
+}
+.g-venue .cat-icon {
+  background: rgba(41, 79, 152, 0.12);
+  color: var(--base-bright);
+}
+.cat-opt {
+  --tint: var(--base);
+  --tint-fg: var(--base);
+  --tint-on: #fff;
+  --tint-bg: rgba(37, 68, 129, 0.1);
+  --tint-soft: #fff;
+}
+.cat-opt.g-land {
+  --tint: var(--pop);
+  --tint-fg: var(--base-deep);
+  --tint-on: var(--base-deep);
+  --tint-bg: var(--pop-pale);
+  --tint-soft: #fff;
+}
+.cat-opt.g-commercial {
+  --tint: var(--base-deep);
+  --tint-fg: var(--base-deep);
+  --tint-on: #fff;
+  --tint-bg: rgba(21, 43, 89, 0.1);
+  --tint-soft: #fff;
+}
+.cat-opt.g-venue {
+  --tint: var(--base-bright);
+  --tint-fg: var(--base-bright);
+  --tint-on: #fff;
+  --tint-bg: rgba(41, 79, 152, 0.12);
+  --tint-soft: #fff;
+}
+.cat-opt-icon {
+  color: var(--tint-fg);
+}
+.cat-opt.on .cat-opt-icon,
+.cat-opt-check {
+  background: var(--tint);
+  color: var(--tint-on);
+}
+
+/* Logo: the 4 sits on a gold tile, because gold text alone is unreadable on white. */
+.logo-word b,
+.auth-logo .logo-word b {
+  display: inline-block;
+  margin: 0 0.06em;
+  padding: 0.04em 0.2em 0.06em;
+  border-radius: 0.24em;
+  background: linear-gradient(135deg, var(--pop-light) 0%, var(--pop) 70%);
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--base-deep);
+  line-height: 1.05;
+}
+.logo-tld {
+  color: var(--base);
+}
+
+/* Gold actions: yellow to gold, as in the image chevrons. */
+.btn-accent {
+  background: linear-gradient(135deg, var(--pop-light) 0%, var(--pop) 70%);
+  box-shadow: 0 2px 10px rgba(252, 187, 6, 0.3);
+}
+.btn-accent:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--pop) 0%, var(--pop-mid) 100%);
+}
+.block-head h2::before {
+  background: linear-gradient(135deg, var(--pop-light), var(--pop));
+}
+
+/* Re-apply responsive art sizing after the exact-palette backgrounds above. */
+@media (max-width: 1024px) {
+  .hero {
+    background-size: auto 80%, auto;
+    background-position: right -90px top -40px, 0 0;
+  }
+}
+@media (max-width: 720px) {
+  .hero {
+    background-size: 200px auto, auto;
+    background-position: right -78px top -64px, 0 0;
+  }
+  .cta-band {
+    background-size: auto 128px, auto;
+    background-position: right 16px bottom, 0 0;
+  }
+  .footer {
+    background-size: 190px auto, auto;
+    background-position: right -24px top -14px, 0 0;
+  }
+}
+
+/* ───────────────────────── States ───────────────────────── */
+.chip-all {
+  border-color: var(--base);
+  color: var(--base);
+  font-weight: 600;
+}
+.loc-empty {
+  padding: 14px 10px;
+}
+.states-search {
+  max-width: 420px;
+  margin-bottom: 8px;
+}
+.zone-block {
+  margin-top: 32px;
+}
+.state-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.state-card {
+  padding: 6px 6px 14px;
+}
+.state-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 10px 12px;
+  border-radius: 12px;
+}
+.state-card-head:hover {
+  background: var(--hover);
+}
+.state-card-head > span {
+  display: flex;
+  flex-direction: column;
+}
+.state-card-head strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.state-card-head small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.state-card-head svg {
+  color: var(--muted);
+  flex: none;
+}
+.state-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 10px;
+}
+.state-cities .chip {
+  height: 34px;
+  font-size: 13.5px;
 }

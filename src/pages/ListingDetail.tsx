@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Bath, BedDouble, Calculator, Car, Check, ChevronLeft, ChevronRight, LandPlot, Map as MapIcon, MapPin, MessageCircle, Phone, PhoneCall, Ruler, Share2, TrendingUp } from 'lucide-react'
 import type { Listing } from '../types'
 import { categoryBySlug } from '../data/categories'
-import { cityName } from '../data/locations'
+import { cityName, fullLocation } from '../data/locations'
 import { sellerById } from '../data/sellers'
 import { useStore } from '../lib/store'
 import { maskPhone, naira, nairaCompact, timeAgo, unitLabel, yearsOn } from '../lib/format'
@@ -115,7 +115,7 @@ function Detail({ l }: { l: Listing }) {
                 {l.tier === 'featured' && <span className="flag">Featured</span>}
                 <h1>{l.title}</h1>
                 <p className="detail-sub">
-                  <MapPin size={15} /> {l.area}, {cityName(l.city)} · {timeAgo(l.postedAt)} · {l.views.toLocaleString()} views
+                  <MapPin size={15} /> {fullLocation(l.city, l.area)} · {timeAgo(l.postedAt)} · {l.views.toLocaleString()} views
                 </p>
               </div>
               <div className="detail-tools">
@@ -185,7 +185,7 @@ function Detail({ l }: { l: Listing }) {
 
           <div className="detail-folds">
             <CostCalculator l={l} />
-            <Fold title="Location" icon={MapIcon} hint={`${l.area}, ${cityName(l.city)}`}>
+            <Fold title="Location" icon={MapIcon} hint={fullLocation(l.city, l.area)}>
               <p className="muted small">Approximate location. Confirm the exact address with the seller before inspection.</p>
               <iframe className="map" title="Map" loading="lazy" src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBox}&layer=mapnik&marker=${l.lat},${l.lng}`} />
             </Fold>
