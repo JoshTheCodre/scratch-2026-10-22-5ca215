@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, ImagePlus, Trash2, Star } from 'lucide-react'
 import type { CategorySlug, Condition, Furnishing, Listing, PriceUnit } from '../types'
-import { CATEGORIES, CONDITIONS, FACILITIES, FURNISHING, LAND_DOCUMENTS, categoryBySlug } from '../data/categories'
+import { CATEGORIES, COMMERCIAL_TYPES, CONDITIONS, FACILITIES, FURNISHING, LAND_DOCUMENTS, categoryBySlug } from '../data/categories'
 import { STATES, cityBySlug, stateBySlug, stateOfCity } from '../data/locations'
 import { useStore } from '../lib/store'
 import { listingPath, naira, slugify, unitLabel } from '../lib/format'
@@ -115,7 +115,8 @@ export default function PostAd() {
   const cat = categoryBySlug(d.category)
   const city = cityBySlug(d.city)
   const isLand = cat?.group === 'land'
-  const residential = cat?.group === 'residential'
+  // Offices, shops etc. in the sale category have no bedrooms or bathrooms.
+  const residential = cat?.group === 'residential' && !COMMERCIAL_TYPES.includes(d.propertyType)
   const facilityOptions = isLand ? LAND_FEATURES : FACILITIES
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) =>

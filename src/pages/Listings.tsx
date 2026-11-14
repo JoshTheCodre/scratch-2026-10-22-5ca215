@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, LayoutGrid, List, SearchX, SlidersHorizontal, X } from 'lucide-react'
-import { ALL_CATEGORIES, CATEGORIES, categoryBySlug, isCategorySlug } from '../data/categories'
+import { ALL_CATEGORIES, CATEGORIES, RETIRED_CATEGORIES, categoryBySlug, isCategorySlug } from '../data/categories'
 import { ALL_CITIES, isPlace, placeName } from '../data/locations'
 import { useStore } from '../lib/store'
 import { applyFilters, PAGE_SIZE, parseFilters, POSTED_OPTIONS, scopeListings, SORT_OPTIONS, sortListings } from '../lib/filters'
@@ -14,6 +14,8 @@ import NotFound from './NotFound'
 
 export default function Listings() {
   const { city = '', category = '' } = useParams()
+  const retired = RETIRED_CATEGORIES[category]
+  if (retired && isPlace(city)) return <Navigate to={`/${city}/${retired.to}?${new URLSearchParams(retired.filter)}`} replace />
   const valid = isPlace(city) && (category === ALL_CATEGORIES || isCategorySlug(category))
   return valid ? <ListingsView key={`${city}/${category}`} city={city} category={category} /> : <NotFound />
 }

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Listing, Thread, User } from '../types'
 import { SEED_LISTINGS } from '../data/listings'
+import { RETIRED_CATEGORIES } from '../data/categories'
 
 // Client-side store persisted to localStorage. Swap these actions for API calls later.
 
@@ -23,8 +24,11 @@ function persist(name: string, value: unknown) {
   }
 }
 
-function usePersisted<T>(name: string, fallback: T) {
-  const [value, setValue] = useState<T>(() => load(name, fallback))
+function usePersisted<T>(name: string, fallback: T, migrate?: (value: T) => T) {
+  const [value, setValue] = useState<T>(() => {
+    const loaded = load(name, fallback)
+    return migrate ? migrate(loaded) : loaded
+  })
   useEffect(() => {
     persist(name, value)
   }, [name, value])
@@ -59,6 +63,11 @@ interface Store {
   toast: (text: string, tone?: Toast['tone']) => void
 }
 
+// Ads saved before "New Builds" and "Commercial Property for Sale" were folded into
+// "Houses & Properties For Sale" move to that category.
+const migrateAds = (ads: Listing[]) =>
+  ads.map((a) => (RETIRED_CATEGORIES[a.category] ? { ...a, category: RETIRED_CATEGORIES[a.category]!.to } : a))
+
 const Ctx = createContext<Store | null>(null)
 
 const AUTO_REPLIES = [
@@ -71,7 +80,7 @@ const AUTO_REPLIES = [
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = usePersisted<User | null>('user', null)
   const [saved, setSaved] = usePersisted<string[]>('saved', [])
-  const [myAds, setMyAds] = usePersisted<Listing[]>('myAds', [])
+  const [myAds, setMyAds] = usePersisted<Listing[]>('myAds', [], migrateAds)
   const [threads, setThreads] = usePersisted<Thread[]>('threads', [])
   const [recent, setRecent] = usePersisted<string[]>('recent', [])
   const [toasts, setToasts] = useState<Toast[]>([])

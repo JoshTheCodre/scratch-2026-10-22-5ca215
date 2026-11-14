@@ -14,12 +14,15 @@ export const CATEGORIES: Category[] = [
   },
   {
     slug: 'houses-apartments-for-sale',
-    name: 'Houses & Apartments For Sale',
+    name: 'Houses & Properties For Sale',
     short: 'For Sale',
     deal: 'sale',
     group: 'residential',
-    types: ['Bungalow', 'Detached Duplex', 'Semi-Detached Duplex', 'Terraced Duplex', 'Block of Flats', 'Apartment', 'Mansion', 'Penthouse'],
-    blurb: 'Own a home — bungalows, duplexes, mansions and blocks of flats.',
+    types: [
+      'Bungalow', 'Detached Duplex', 'Semi-Detached Duplex', 'Terraced Duplex', 'Block of Flats', 'Apartment', 'Mansion', 'Penthouse',
+      'Office Space', 'Shop', 'Warehouse', 'Plaza', 'Hotel', 'School Building',
+    ],
+    blurb: 'Homes, new builds and commercial buildings — bungalows, duplexes, offices, shops and plazas.',
   },
   {
     slug: 'land-plots-for-sale',
@@ -49,15 +52,6 @@ export const CATEGORIES: Category[] = [
     blurb: 'Serviced apartments by the night — for trips, staycations and events.',
   },
   {
-    slug: 'new-builds',
-    name: 'New Builds',
-    short: 'New Builds',
-    deal: 'sale',
-    group: 'residential',
-    types: ['Terraced Duplex', 'Semi-Detached Duplex', 'Detached Duplex', 'Apartment', 'Bungalow'],
-    blurb: 'Off-plan and just-completed homes direct from developers.',
-  },
-  {
     slug: 'commercial-property-for-rent',
     name: 'Commercial Property for Rent',
     short: 'Commercial Rent',
@@ -65,15 +59,6 @@ export const CATEGORIES: Category[] = [
     group: 'commercial',
     types: ['Office Space', 'Shop', 'Warehouse', 'Plaza', 'Filling Station', 'Hotel'],
     blurb: 'Offices, shops, warehouses and plazas to let.',
-  },
-  {
-    slug: 'commercial-property-for-sale',
-    name: 'Commercial Property for Sale',
-    short: 'Commercial Sale',
-    deal: 'sale',
-    group: 'commercial',
-    types: ['Office Space', 'Shop', 'Warehouse', 'Plaza', 'Hotel', 'School Building'],
-    blurb: 'Income-earning buildings, plazas, hotels and warehouses.',
   },
   {
     slug: 'event-centres-venues',
@@ -89,6 +74,15 @@ export const CATEGORIES: Category[] = [
 export const categoryBySlug = (slug?: string) => CATEGORIES.find((c) => c.slug === slug)
 
 export const isCategorySlug = (slug: string): slug is CategorySlug => CATEGORIES.some((c) => c.slug === slug)
+
+/** Property types that are businesses rather than homes — no bedrooms or bathrooms. */
+export const COMMERCIAL_TYPES = ['Office Space', 'Shop', 'Warehouse', 'Plaza', 'Filling Station', 'Hotel', 'School Building']
+
+/** Categories folded into "Houses & Properties For Sale". Old links redirect with a matching filter. */
+export const RETIRED_CATEGORIES: Record<string, { to: CategorySlug; filter: Record<string, string> }> = {
+  'new-builds': { to: 'houses-apartments-for-sale', filter: { condition: 'Newly-Built,Off-Plan' } },
+  'commercial-property-for-sale': { to: 'houses-apartments-for-sale', filter: { type: 'Office Space,Shop,Warehouse,Plaza,Hotel,School Building' } },
+}
 
 export const FACILITIES = [
   '24-hour Electricity',

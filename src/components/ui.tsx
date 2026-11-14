@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   BadgeCheck, Briefcase, Building, Building2, Castle, CheckCircle2, ChevronDown, ChevronRight, Crown, DoorClosed, DoorOpen, Fence, Fuel,
-  HardHat, Heart, Home, Hotel, House, Info, KeyRound, LandPlot, Laptop, Layers, PartyPopper, Presentation, School, ShieldCheck,
+  Heart, Home, Hotel, House, Info, KeyRound, LandPlot, Laptop, Layers, PartyPopper, Presentation, School, ShieldCheck,
   Sofa, Sprout, Star, Store, Tent, Tractor, Trees, Warehouse, X, BedDouble, type LucideIcon,
 } from 'lucide-react'
 import type { CategorySlug, Seller, Tier } from '../types'
@@ -16,9 +16,7 @@ export const CATEGORY_ICONS: Record<CategorySlug, LucideIcon> = {
   'land-plots-for-sale': LandPlot,
   'land-plots-for-rent': Tractor,
   'short-let': BedDouble,
-  'new-builds': HardHat,
   'commercial-property-for-rent': Store,
-  'commercial-property-for-sale': Building,
   'event-centres-venues': PartyPopper,
 }
 

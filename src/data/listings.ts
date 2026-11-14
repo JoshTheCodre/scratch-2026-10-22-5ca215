@@ -54,7 +54,7 @@ const LUX_FACILITIES = ['Swimming Pool', 'Gym', 'Boys Quarters (BQ)', 'Smart Hom
 const SHORTLET_FACILITIES = ['24-hour Electricity', 'Wi-Fi', 'Air Conditioning', 'Smart TV with streaming', 'Security', 'Fitted Kitchen', 'Parking Space', 'Housekeeping', 'Hot Water']
 const COMMERCIAL_FACILITIES = ['24-hour Electricity', 'Parking Space', 'Security', 'CCTV', 'Elevator', 'Fire Safety', 'Loading Bay', 'Generator', 'Road Frontage']
 
-function sellerFor(category: CategorySlug, city: string): string {
+function sellerFor(category: GenKind, city: string): string {
   if (city === 'lagos') return pick(['s10', 's10', 's11'])
   if (city === 'abuja') return 's12'
   if (city === 'owerri') return 's13'
@@ -225,7 +225,7 @@ function saleDraft(area: string, mult: number, newBuild: boolean): Draft {
       : `\n${pick(['Price is slightly negotiable after inspection.', 'Distress sale — owner relocating.', 'Ready for immediate occupation.', 'Ideal for family living or rental income.'])}`,
   ].join('\n')
   return {
-    category: newBuild ? 'new-builds' : 'houses-apartments-for-sale',
+    category: 'houses-apartments-for-sale',
     propertyType: type,
     title,
     price,
@@ -348,7 +348,7 @@ function commercialDraft(area: string, mult: number, sale: boolean): Draft {
   const price = roundTo(between(pl, ph) * mult * 1_000_000, sale ? 1_000_000 : 50_000)
   const facilities = sample(COMMERCIAL_FACILITIES, int(4, 7))
   return {
-    category: sale ? 'commercial-property-for-sale' : 'commercial-property-for-rent',
+    category: sale ? 'houses-apartments-for-sale' : 'commercial-property-for-rent',
     propertyType: type,
     title: pick([`${type} ${sale ? 'for Sale' : 'to Let'} on ${pick(STREETS)}, ${area}`, `${size} sqm ${type} — ${area}`, `Prime ${type} ${sale ? 'for Sale' : 'for Rent'} in ${area}`]),
     price,
@@ -388,7 +388,11 @@ function eventDraft(area: string, mult: number): Draft {
   }
 }
 
-const CATEGORY_COUNTS: [CategorySlug, number][] = [
+// Generation "kinds": new builds and commercial sales are generated separately but filed
+// under "Houses & Properties For Sale".
+type GenKind = CategorySlug | 'new-builds' | 'commercial-property-for-sale'
+
+const CATEGORY_COUNTS: [GenKind, number][] = [
   ['houses-apartments-for-rent', 52],
   ['houses-apartments-for-sale', 36],
   ['land-plots-for-sale', 38],
@@ -413,7 +417,7 @@ function pickCity() {
   return UYO!
 }
 
-function makeListing(cat: CategorySlug, city: City, i: number, now: number): Listing {
+function makeListing(cat: GenKind, city: City, i: number, now: number): Listing {
       const area = pick(city.areas)
       const mult = (CITY_MULT[city.slug] ?? DEFAULT_MULT) * areaMult(area)
       let d: Draft

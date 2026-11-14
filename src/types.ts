@@ -4,9 +4,7 @@ export type CategorySlug =
   | 'land-plots-for-sale'
   | 'land-plots-for-rent'
   | 'short-let'
-  | 'new-builds'
   | 'commercial-property-for-rent'
-  | 'commercial-property-for-sale'
   | 'event-centres-venues'
 
 export type Deal = 'rent' | 'sale' | 'shortlet'
