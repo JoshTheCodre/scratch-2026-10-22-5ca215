@@ -23,7 +23,7 @@ export default function Agents() {
 
   return (
     <div className="container page-simple">
-      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'Trusted agents' }]} />
+      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'Trusted agents' }]} />
       <div className="page-intro">
         <Award size={32} />
         <div>

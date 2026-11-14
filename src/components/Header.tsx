@@ -215,7 +215,7 @@ export function Footer() {
     <footer className="footer">
       <div className="container footer-grid">
         <div>
-          <h5>About House4Rent.ng</h5>
+          <h5>About House Deela</h5>
           <Link to="/about">About us</Link>
           <Link to="/terms">Terms &amp; conditions</Link>
           <Link to="/privacy">Privacy policy</Link>
@@ -247,7 +247,7 @@ export function Footer() {
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} House4Rent.ng. Homes, land &amp; spaces across Nigeria.</span>
+        <span>© {new Date().getFullYear()} House Deela. Homes, land &amp; spaces across Nigeria.</span>
         <span>Demo build — listings are sample data.</span>
       </div>
     </footer>

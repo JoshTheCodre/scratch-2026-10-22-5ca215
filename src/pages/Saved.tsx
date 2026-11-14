@@ -10,7 +10,7 @@ export default function Saved() {
   const items = saved.map((id) => byId(id)).filter(Boolean) as Listing[]
   return (
     <div className="container page-simple">
-      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'Saved adverts' }]} />
+      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'Saved adverts' }]} />
       <h1 className="page-title">Saved adverts</h1>
       {items.length === 0 ? (
         <EmptyState

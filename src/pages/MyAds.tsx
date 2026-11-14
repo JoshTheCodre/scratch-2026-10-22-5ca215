@@ -14,7 +14,7 @@ export default function MyAds() {
 
   return (
     <div className="container page-simple">
-      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'My adverts' }]} />
+      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'My adverts' }]} />
       <div className="row-between">
         <h1 className="page-title">My adverts</h1>
         <Link to="/sell" className="btn btn-accent">

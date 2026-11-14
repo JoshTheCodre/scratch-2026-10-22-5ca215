@@ -55,8 +55,8 @@ export const slugify = (s: string) =>
 
 export function yearsOn(joinedYear: number): string {
   const y = new Date().getFullYear() - joinedYear
-  if (y < 1) return 'New on House4Rent'
-  return `${y}+ year${y > 1 ? 's' : ''} on House4Rent`
+  if (y < 1) return 'New on House Deela'
+  return `${y}+ year${y > 1 ? 's' : ''} on House Deela`
 }
 
 export const initials = (name: string) =>

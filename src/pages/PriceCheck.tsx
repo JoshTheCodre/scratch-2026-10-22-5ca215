@@ -60,12 +60,12 @@ export default function PriceCheck() {
 
   return (
     <div className="container page-simple">
-      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'Price check' }]} />
+      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'Price check' }]} />
       <div className="page-intro">
         <TrendingUp size={32} />
         <div>
           <h1 className="page-title">Price check</h1>
-          <p className="muted">See what similar properties are listed for before you inspect or make an offer. Based on live asking prices on House4Rent.ng.</p>
+          <p className="muted">See what similar properties are listed for before you inspect or make an offer. Based on live asking prices on House Deela.</p>
         </div>
       </div>
 

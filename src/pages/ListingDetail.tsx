@@ -35,9 +35,9 @@ function Detail({ l }: { l: Listing }) {
 
   useEffect(() => {
     addRecent(l.id)
-    document.title = `${l.title} — ${naira(l.price)} | House4Rent.ng`
+    document.title = `${l.title} — ${naira(l.price)} | House Deela`
     return () => {
-      document.title = 'House4Rent.ng — Property for rent & sale in Nigeria'
+      document.title = 'House Deela — Property for rent & sale in Nigeria'
     }
   }, [l.id, l.title, l.price, addRecent])
 

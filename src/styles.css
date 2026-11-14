@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   House4Rent.ng design system
+   House Deela design system
    Principles: few colours, warm neutrals, one clear action per view,
    pill buttons, soft corners, no borders where whitespace will do.
    Swap the palette block to re-skin the whole site.
@@ -4742,4 +4742,12 @@ input[type='range'] {
 .cat-opt-icon {
   background: var(--brand);
   color: #fff;
+}
+
+/* House Deela wordmark: "House" in navy, "Deela" on the gold tile. */
+.logo-word b,
+.auth-logo .logo-word b {
+  margin: 0 0 0 0.16em;
+  padding: 0.04em 0.24em 0.07em;
+  letter-spacing: -0.035em;
 }

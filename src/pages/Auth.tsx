@@ -21,8 +21,8 @@ export default function Auth({ mode }: { mode: 'login' | 'register' }) {
     if (phone.replace(/\D/g, '').length < 10) return setError('Enter a valid phone number')
     if (password.length < 6) return setError('Password must be at least 6 characters')
     if (isRegister && name.trim().length < 2) return setError('Enter your full name')
-    login({ name: isRegister ? name.trim() : name.trim() || 'House4Rent user', phone: phone.trim(), email: email.trim() || undefined })
-    toast(isRegister ? 'Welcome to House4Rent.ng!' : 'Signed in')
+    login({ name: isRegister ? name.trim() : name.trim() || 'House Deela user', phone: phone.trim(), email: email.trim() || undefined })
+    toast(isRegister ? 'Welcome to House Deela!' : 'Signed in')
     navigate(sp.get('next') ?? '/')
   }
 
@@ -65,7 +65,7 @@ export default function Auth({ mode }: { mode: 'login' | 'register' }) {
             </>
           ) : (
             <>
-              New to House4Rent.ng? <Link to="/register">Create an account</Link>
+              New to House Deela? <Link to="/register">Create an account</Link>
             </>
           )}
         </p>

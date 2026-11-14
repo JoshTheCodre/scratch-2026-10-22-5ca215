@@ -1,4 +1,4 @@
-# House4Rent.ng — property marketplace (front-end prototype)
+# House Deela — property marketplace (front-end prototype)
 
 A property-only classifieds site: houses & apartments for rent and sale, land & plots, short lets, new builds, commercial property and event spaces. Layout follows the familiar classifieds pattern (filter sidebar + card grid + detail page), with its own brand, copy and demo data.
 
