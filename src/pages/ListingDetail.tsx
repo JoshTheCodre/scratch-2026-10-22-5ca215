@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Bath, BedDouble, Calculator, Car, Check, ChevronLeft, ChevronRight, LandPlot, Map as MapIcon, MapPin, MessageCircle, Phone, PhoneCall, Ruler, Share2, TrendingUp } from 'lucide-react'
+import { Bath, BedDouble, Calculator, CalendarCheck, CalendarDays, Car, Check, ChevronLeft, ChevronRight, LandPlot, Map as MapIcon, MapPin, MessageCircle, Navigation, Phone, PhoneCall, Ruler, Search, Share2, TrendingUp } from 'lucide-react'
 import type { Listing } from '../types'
 import { categoryBySlug } from '../data/categories'
 import { cityName, fullLocation } from '../data/locations'
 import { sellerById } from '../data/sellers'
 import { useStore } from '../lib/store'
 import { maskPhone, naira, nairaCompact, timeAgo, unitLabel, yearsOn } from '../lib/format'
+import { similarListings } from '../lib/similar'
+import { formatMinutes } from '../lib/geo'
+import { availabilityFor, availabilityText, bookingDateText, isUpcoming, viewingWord } from '../lib/inspection'
+import { BookInspection } from '../components/BookInspection'
+import { CommuteList, commuteTo } from '../components/Places'
+import { PriceCompare } from '../components/PriceCompare'
 import { Gallery } from '../components/Gallery'
 import { ListingCard } from '../components/ListingCard'
 import { Avatar, Fold, Modal, SafetyTips, SaveButton, Stars, VerifiedBadge, typeIcon } from '../components/ui'
@@ -20,7 +26,7 @@ export default function ListingDetail() {
 }
 
 function Detail({ l }: { l: Listing }) {
-  const { listings, addRecent, recent, byId, openThread, user, toast } = useStore()
+  const { listings, addRecent, recent, byId, openThread, user, toast, places, bookings } = useStore()
   const navigate = useNavigate()
   const cat = categoryBySlug(l.category)!
   const seller = l.isUserAd
@@ -29,7 +35,10 @@ function Detail({ l }: { l: Listing }) {
   const [showPhone, setShowPhone] = useState(false)
   const [descOpen, setDescOpen] = useState(false)
   const [moreAttrs, setMoreAttrs] = useState(false)
-  const [modal, setModal] = useState<null | 'callback' | 'report' | 'unavailable'>(null)
+  const [modal, setModal] = useState<null | 'callback' | 'report' | 'unavailable' | 'book'>(null)
+  const booking = bookings.find((b) => b.listingId === l.id && b.status !== 'cancelled' && isUpcoming(b))
+  const word = viewingWord(l)
+  const firstCommute = places.map((p) => ({ p, c: commuteTo(l, p) })).find((r) => r.c)
   const unit = unitLabel(l.priceUnit, l.category)
   const longDesc = l.description.length > 420 || l.description.split('\n').length > 9
 
@@ -41,14 +50,8 @@ function Detail({ l }: { l: Listing }) {
     }
   }, [l.id, l.title, l.price, addRecent])
 
-  const similar = useMemo(
-    () =>
-      listings
-        .filter((x) => x.id !== l.id && x.status === 'active' && x.category === l.category && x.city === l.city)
-        .sort((a, b) => Math.abs(Math.log(a.price / l.price)) - Math.abs(Math.log(b.price / l.price)))
-        .slice(0, 4),
-    [listings, l],
-  )
+  const similar = useMemo(() => similarListings(l, listings, 4, 35), [listings, l])
+  const similarUrl = `/${l.city}/${l.category}?like=${l.id}`
   const recentItems = recent.filter((r) => r !== l.id).map((r) => byId(r)).filter(Boolean).slice(0, 4) as Listing[]
 
   const keyFacts = [
@@ -119,6 +122,9 @@ function Detail({ l }: { l: Listing }) {
                 </p>
               </div>
               <div className="detail-tools">
+                <Link to={similarUrl} className="icon-pill" aria-label="Find similar properties" title="Find similar">
+                  <Search size={18} />
+                </Link>
                 <button className="icon-pill" onClick={share} aria-label="Share" title="Share">
                   <Share2 size={18} />
                 </button>
@@ -183,7 +189,17 @@ function Detail({ l }: { l: Listing }) {
             </section>
           )}
 
+          <PriceCompare l={l} sellerName={seller.name} />
+
           <div className="detail-folds">
+            <Fold
+              title="Commute"
+              icon={Navigation}
+              defaultOpen={places.length > 0}
+              hint={firstCommute?.c ? `${formatMinutes(firstCommute.c.drive)} to ${firstCommute.p.name}` : 'Church, work, school'}
+            >
+              <CommuteList l={l} />
+            </Fold>
             <CostCalculator l={l} />
             <Fold title="Location" icon={MapIcon} hint={fullLocation(l.city, l.area)}>
               <p className="muted small">Approximate location. Confirm the exact address with the seller before inspection.</p>
@@ -227,6 +243,20 @@ function Detail({ l }: { l: Listing }) {
               </Link>
             ) : (
               <div className="side-actions">
+                {booking ? (
+                  <Link to="/inspections" className="booked-card">
+                    <CalendarCheck size={20} />
+                    <span>
+                      <strong>{booking.status === 'confirmed' ? 'Inspection confirmed' : 'Inspection requested'}</strong>
+                      <small>{bookingDateText(booking, true)}</small>
+                    </span>
+                    <ChevronRight size={16} />
+                  </Link>
+                ) : (
+                  <button className="btn btn-accent block" onClick={() => setModal('book')}>
+                    <CalendarDays size={17} /> Book {word === 'viewing' ? 'a viewing' : 'inspection'}
+                  </button>
+                )}
                 <ContactButton phone={seller.phone} shown={showPhone} onShow={() => setShowPhone(true)} />
                 <button className="btn btn-soft block" onClick={startChat}>
                   <MessageCircle size={17} /> Chat with seller
@@ -236,7 +266,10 @@ function Detail({ l }: { l: Listing }) {
                 </button>
               </div>
             )}
-            <p className="side-note">{seller.responseTime}</p>
+            <p className="side-note">
+              {seller.responseTime}
+              {` · ${l.isUserAd ? "Inspections" : "Shows"} ${availabilityText(availabilityFor(l))}`}
+            </p>
 
             <Link to={priceCheckUrl} className="price-check-link">
               <TrendingUp size={17} />
@@ -268,9 +301,9 @@ function Detail({ l }: { l: Listing }) {
       {similar.length > 0 && (
         <section className="block">
           <div className="block-head">
-            <h2>Similar adverts</h2>
-            <Link to={`/${l.city}/${l.category}`} className="see-all">
-              See all <ChevronRight size={16} />
+            <h2>Similar homes</h2>
+            <Link to={similarUrl} className="see-all">
+              See all similar <ChevronRight size={16} />
             </Link>
           </div>
           <div className="card-grid four">
@@ -296,15 +329,25 @@ function Detail({ l }: { l: Listing }) {
 
       {!l.isUserAd && (
         <div className="mobile-cta">
-          <a className="btn btn-soft" href={`tel:${seller.phone.replace(/\s/g, '')}`}>
-            <Phone size={16} /> Call
+          <a className="btn btn-soft icon-only" href={`tel:${seller.phone.replace(/\s/g, '')}`} aria-label="Call seller">
+            <Phone size={18} />
           </a>
-          <button className="btn btn-primary" onClick={startChat}>
+          <button className="btn btn-soft" onClick={startChat}>
             <MessageCircle size={16} /> Chat
           </button>
+          {booking ? (
+            <Link to="/inspections" className="btn btn-primary">
+              <CalendarCheck size={16} /> {booking.status === 'confirmed' ? 'Booked' : 'Requested'}
+            </Link>
+          ) : (
+            <button className="btn btn-accent" onClick={() => setModal('book')}>
+              <CalendarDays size={16} /> Book {word}
+            </button>
+          )}
         </div>
       )}
 
+      {modal === 'book' && <BookInspection l={l} sellerName={seller.name} open onClose={() => setModal(null)} />}
       <CallbackModal open={modal === 'callback'} onClose={() => setModal(null)} sellerName={seller.name} />
       <ReportModal open={modal === 'report'} onClose={() => setModal(null)} />
       <Modal open={modal === 'unavailable'} onClose={() => setModal(null)} title="Mark as unavailable?">

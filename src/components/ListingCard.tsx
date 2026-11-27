@@ -5,6 +5,7 @@ import { sellerById } from '../data/sellers'
 import { cityName } from '../data/locations'
 import { listingPath, naira, timeAgo, unitLabel } from '../lib/format'
 import { Img, SaveButton } from './ui'
+import { CommuteChip } from './Places'
 
 /** Short facts for a card, e.g. "3 beds · 3 baths · 465 sqm". */
 export function listingFacts(l: Listing): string[] {
@@ -50,6 +51,7 @@ export function ListingCard({ l, view = 'grid' }: { l: Listing; view?: 'grid' | 
           {seller?.verified && <BadgeCheck size={15} className="lcard-verified" aria-label="Verified seller" />}
           {view === 'list' && <span className="lcard-time">{timeAgo(l.postedAt)}</span>}
         </p>
+        <CommuteChip l={l} />
       </div>
     </article>
   )

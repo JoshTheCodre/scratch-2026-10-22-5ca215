@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, BadgeCheck, MapPin, Search, ShieldCheck, TrendingUp } from 'lucide-react'
+import { ArrowRight, BadgeCheck, MapPin, Search, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react'
 import { ALL_CATEGORIES, CATEGORIES } from '../data/categories'
 import { ALL_CITIES, DEFAULT_CITY, STATES, cityBySlug, inPlace, placeName } from '../data/locations'
 import { useStore } from '../lib/store'
 import { countBy, sortListings } from '../lib/filters'
+import { parseSearch, searchUrl, SEARCH_EXAMPLES } from '../lib/nlsearch'
 import { ListingCard } from '../components/ListingCard'
 import { CATEGORY_ICONS, SAFETY_TIPS } from '../components/ui'
 
 export default function Home() {
-  const { listings, recent, byId } = useStore()
+  const { listings, recent, byId, places } = useStore()
   const navigate = useNavigate()
   const [city, setCity] = useState(DEFAULT_CITY)
   const [q, setQ] = useState('')
@@ -25,9 +26,16 @@ export default function Home() {
   const shortlets = useMemo(() => sortListings(inCity.filter((l) => l.category === 'short-let'), 'recommended').slice(0, 4), [inCity])
   const recentItems = recent.map((id) => byId(id)).filter(Boolean).slice(0, 4)
 
+  // Read the sentence as you type so people can see what we understood.
+  const parsed = useMemo(() => (q.trim().length > 2 ? parseSearch(q, listings) : null), [q, listings])
+  const run = (text: string) => {
+    const t = text.trim()
+    if (!t) return navigate(`/${city}/${ALL_CATEGORIES}`)
+    navigate(searchUrl(parseSearch(t, listings), t, city, places))
+  }
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    navigate(`/${city}/${ALL_CATEGORIES}${q.trim() ? `?q=${encodeURIComponent(q.trim())}` : ''}`)
+    run(q)
   }
   const cityLabel = placeName(city)
 
@@ -57,10 +65,29 @@ export default function Home() {
           </label>
           <label className="hs-q">
             <Search size={18} />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Try “3 bedroom flat in Woji”" aria-label="Keywords" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Describe it: “3 bed flat in Woji under 2.5m”" aria-label="Describe the property you want" enterKeyHint="search" />
           </label>
           <button className="btn btn-accent">Search</button>
         </form>
+        {parsed && parsed.understood.length > 0 ? (
+          <p className="hero-understood" aria-live="polite">
+            <Sparkles size={15} /> <span>We'll look for</span>
+            {parsed.understood.map((u) => (
+              <span key={u} className="u-chip">
+                {u}
+              </span>
+            ))}
+          </p>
+        ) : (
+          <div className="hero-examples">
+            <span>Try:</span>
+            {SEARCH_EXAMPLES.slice(0, 4).map((ex) => (
+              <button key={ex} type="button" onClick={() => run(ex)}>
+                {ex}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="cat-grid" aria-label="Categories">

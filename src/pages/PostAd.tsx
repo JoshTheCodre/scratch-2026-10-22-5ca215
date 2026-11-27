@@ -6,6 +6,8 @@ import { CATEGORIES, COMMERCIAL_TYPES, CONDITIONS, FACILITIES, FURNISHING, LAND_
 import { STATES, cityBySlug, stateBySlug, stateOfCity } from '../data/locations'
 import { useStore } from '../lib/store'
 import { listingPath, naira, slugify, unitLabel } from '../lib/format'
+import { areaPoint } from '../lib/geo'
+import { DAY_NAMES, availabilityText, hourLabel } from '../lib/inspection'
 import { CATEGORY_ICONS, Img } from '../components/ui'
 
 interface Draft {
@@ -36,7 +38,14 @@ interface Draft {
   serviceCharge: string
   name: string
   phone: string
+  /** Inspection window: weekdays 0–6 and hours. */
+  inspDays: number[]
+  inspFrom: number
+  inspTo: number
 }
+
+const INSPECTION_DEFAULT = { inspDays: [1, 2, 3, 4, 5, 6], inspFrom: 10, inspTo: 16 }
+const HOURS = Array.from({ length: 14 }, (_, i) => i + 7)
 
 const STEPS = ['Category & location', 'Property details', 'Photos', 'Price & contact', 'Review']
 const LAND_FEATURES = ['Dry Land', 'Fenced', 'Gated Estate', 'Tarred Road', 'Electricity Available', 'Good Drainage', 'Corner Piece', 'Instant Allocation', 'Security']
@@ -60,6 +69,9 @@ function fromListing(l: Listing, name: string, phone: string): Draft {
     furnishing: l.furnishing ?? '', condition: l.condition ?? '', document: l.document ?? '', estate: l.estate ?? '', address: l.address ?? '',
     facilities: l.facilities, description: l.description, images: l.images, price: s(l.price), priceUnit: l.priceUnit, negotiable: l.negotiable,
     agentFee: s(l.agentFee), cautionFee: s(l.cautionFee), serviceCharge: s(l.serviceCharge), name, phone,
+    inspDays: l.inspection?.days ?? INSPECTION_DEFAULT.inspDays,
+    inspFrom: l.inspection?.from ?? INSPECTION_DEFAULT.inspFrom,
+    inspTo: l.inspection?.to ?? INSPECTION_DEFAULT.inspTo,
   }
 }
 
@@ -97,7 +109,7 @@ export default function PostAd() {
     const preCat = categoryBySlug(sp.get('category') ?? '')?.slug ?? ''
     try {
       const saved = localStorage.getItem(DRAFT_KEY)
-      if (saved && !preCat) return JSON.parse(saved) as Draft
+      if (saved && !preCat) return { ...INSPECTION_DEFAULT, ...(JSON.parse(saved) as Draft) }
     } catch {
       /* ignore */
     }
@@ -105,6 +117,7 @@ export default function PostAd() {
       category: preCat, city: 'port-harcourt', area: '', propertyType: '', title: '', bedrooms: '', bathrooms: '', toilets: '', parking: '',
       sizeSqm: '', plots: '', furnishing: '', condition: '', document: '', estate: '', address: '', facilities: [], description: '', images: [],
       price: '', priceUnit: defaultUnit(preCat), negotiable: true, agentFee: '', cautionFee: '', serviceCharge: '', name: user?.name ?? '', phone: user?.phone ?? '',
+      ...INSPECTION_DEFAULT,
     }
   })
   const [step, setStep] = useState(d.category ? 1 : 0)
@@ -150,7 +163,7 @@ export default function PostAd() {
     }
     if (s === 1) {
       if (!d.propertyType) e.propertyType = 'Choose the property type'
-      if (d.title.trim().length < 10) e.title = 'Title should be at least 10 characters'
+      if ((d.title.trim() || suggestedTitle).length < 10) e.title = 'Title should be at least 10 characters'
       if (residential && !d.bedrooms) e.bedrooms = 'How many bedrooms?'
       if (isLand && !d.plots && !d.sizeSqm) e.plots = 'Enter number of plots or size'
       if (d.description.trim().length < 30) e.description = 'Describe the property in at least 30 characters'
@@ -160,6 +173,7 @@ export default function PostAd() {
       if (!Number(d.price)) e.price = 'Enter a price'
       if (d.name.trim().length < 2) e.name = 'Enter your name'
       if (d.phone.replace(/\D/g, '').length < 10) e.phone = 'Enter a valid phone number'
+      if (!d.inspDays.length) e.inspDays = 'Pick at least one day for inspections'
     }
     setErrors(e)
     return Object.keys(e).length === 0
@@ -201,8 +215,8 @@ export default function PostAd() {
     const n = (v: string) => (v ? Number(v) : undefined)
     const listing: Listing = {
       id: editing?.id ?? `u${Date.now().toString(36)}`,
-      slug: slugify(d.title),
-      title: d.title.trim(),
+      slug: slugify(d.title.trim() || suggestedTitle),
+      title: d.title.trim() || suggestedTitle,
       category: d.category as CategorySlug,
       propertyType: d.propertyType,
       price: Number(d.price),
@@ -231,9 +245,10 @@ export default function PostAd() {
       postedAt: editing?.postedAt ?? new Date().toISOString(),
       views: editing?.views ?? 0,
       status: 'active',
-      lat: (city?.lat ?? 4.8) + (Math.random() - 0.5) * 0.06,
-      lng: (city?.lng ?? 7) + (Math.random() - 0.5) * 0.06,
+      lat: areaPoint(d.city, d.area).lat + (Math.random() - 0.5) * 0.006,
+      lng: areaPoint(d.city, d.area).lng + (Math.random() - 0.5) * 0.006,
       isUserAd: true,
+      inspection: { days: d.inspDays.length ? d.inspDays : INSPECTION_DEFAULT.inspDays, from: d.inspFrom, to: Math.max(d.inspFrom + 1, d.inspTo) },
     }
     try {
       if (editing) updateAd(editing.id, listing)
@@ -544,6 +559,51 @@ export default function PostAd() {
               </label>
             </div>
             {!user && <p className="muted small">We'll create your seller profile with these details when you publish.</p>}
+            <hr />
+            <div className="field">
+              <span className="field-label">When can people inspect?</span>
+              <p className="muted small">Buyers and tenants book a time inside this window. You'll get each booking in Messages.</p>
+              <div className="chip-row">
+                {[1, 2, 3, 4, 5, 6, 0].map((day) => {
+                  const on = d.inspDays.includes(day)
+                  return (
+                    <button type="button" key={day} className={`chip ${on ? 'on' : ''}`} aria-pressed={on} onClick={() => set('inspDays', on ? d.inspDays.filter((x) => x !== day) : [...d.inspDays, day])}>
+                      {DAY_NAMES[day]}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+            <div className="form-row pair">
+              <label>
+                From
+                <select
+                  value={d.inspFrom}
+                  onChange={(e) => {
+                    const from = Number(e.target.value)
+                    set('inspFrom', from)
+                    if (d.inspTo <= from) set('inspTo', from + 1)
+                  }}
+                >
+                  {HOURS.slice(0, -1).map((h) => (
+                    <option key={h} value={h}>
+                      {hourLabel(h)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                To
+                <select value={d.inspTo} onChange={(e) => set('inspTo', Number(e.target.value))}>
+                  {HOURS.filter((h) => h > d.inspFrom).map((h) => (
+                    <option key={h} value={h}>
+                      {hourLabel(h)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <Err k="inspDays" />
           </div>
         )}
 
@@ -568,6 +628,7 @@ export default function PostAd() {
                   {d.furnishing && <li>{d.furnishing}</li>}
                   {d.document && <li>{d.document}</li>}
                   <li>{d.images.length} photos</li>
+                  <li>Inspections: {availabilityText({ days: d.inspDays, from: d.inspFrom, to: d.inspTo })}</li>
                 </ul>
                 <p className="review-desc">{d.description}</p>
               </div>

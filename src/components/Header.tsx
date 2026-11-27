@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router-dom'
-import { Award, Bookmark, ChevronDown, Heart, LayoutGrid, LogOut, Menu, MessageCircle, Plus, Search, TrendingUp, User, X } from 'lucide-react'
+import { Award, Bookmark, CalendarDays, ChevronDown, Heart, LayoutGrid, LogOut, MapPinned, Menu, MessageCircle, Plus, Search, TrendingUp, User, X } from 'lucide-react'
 import { ALL_CATEGORIES, CATEGORIES, categoryBySlug, isCategorySlug } from '../data/categories'
 import { ALL_CITIES, DEFAULT_CITY, POPULAR_CITIES, STATES, cityBySlug, isPlace } from '../data/locations'
+import type { CategorySlug } from '../types'
 import { useStore } from '../lib/store'
+import { parseSearch, searchUrl } from '../lib/nlsearch'
 import { Avatar, CATEGORY_ICONS, Logo } from './ui'
 
 /** City + category of the current listings route, if we are on one. */
@@ -17,11 +19,11 @@ export function useListingScope() {
 
 export function Header() {
   const scope = useListingScope()
-  const { user, logout, threads, saved } = useStore()
+  const { user, logout, threads, saved, listings, places, bookings } = useStore()
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const [sp] = useSearchParams()
-  const [q, setQ] = useState(sp.get('q') ?? '')
+  const [q, setQ] = useState(sp.get('nl') ?? sp.get('q') ?? '')
   const [drawer, setDrawer] = useState(false)
   const [menu, setMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -30,7 +32,7 @@ export function Header() {
   const cat = categoryBySlug(scope?.category)
 
   useEffect(() => {
-    setQ(sp.get('q') ?? '')
+    setQ(sp.get('nl') ?? sp.get('q') ?? '')
   }, [sp])
   useEffect(() => {
     setDrawer(false)
@@ -43,14 +45,21 @@ export function Header() {
     return () => document.removeEventListener('mousedown', close)
   }, [menu])
 
+  // Plain sentences ("2 bedroom flat in Woji under 2m") become filters; the current
+  // city and category are kept when the search doesn't name new ones.
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    const target = scope ? `/${scope.city}/${scope.category}` : `/${ALL_CITIES}/${ALL_CATEGORIES}`
-    const next = new URLSearchParams(scope ? sp : undefined)
-    q.trim() ? next.set('q', q.trim()) : next.delete('q')
-    next.delete('page')
-    navigate(`${target}?${next.toString()}`)
+    const text = q.trim()
+    if (!text) {
+      navigate(scope ? `/${scope.city}/${scope.category}` : `/${ALL_CITIES}/${ALL_CATEGORIES}`)
+      return
+    }
+    const parsed = parseSearch(text, listings)
+    if (!parsed.category && scope && scope.category !== ALL_CATEGORIES) parsed.category = scope.category as CategorySlug
+    navigate(searchUrl(parsed, text, scope?.city ?? ALL_CITIES, places))
+    ;(document.activeElement as HTMLElement | null)?.blur()
   }
+  const upcoming = bookings.filter((b) => b.status !== 'cancelled' && new Date(b.date).getTime() > Date.now() - 864e5).length
 
   // On narrow screens the search box lives in its own row (or the hero on the home page).
   const isHome = pathname === '/'
@@ -65,7 +74,7 @@ export function Header() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     setTimeout(() => document.querySelector<HTMLInputElement>(isHome ? '.hs-q input' : '.sub-search input')?.focus(), 300)
   }
-  const placeholder = `Search in ${cat ? cat.short : 'Property'}`
+  const placeholder = cat ? `Search ${cat.short.toLowerCase()} — try “3 bed in Woji under 2m”` : 'Try “2 bedroom flat in Lekki under 3m”'
 
   return (
     <>
@@ -109,6 +118,8 @@ export function Header() {
                     <Link to="/my-ads"><LayoutGrid size={16} /> My adverts</Link>
                     <Link to="/saved"><Bookmark size={16} /> Saved adverts</Link>
                     <Link to="/messages"><MessageCircle size={16} /> Messages</Link>
+                    <Link to="/inspections"><CalendarDays size={16} /> Inspections</Link>
+                    <Link to="/places"><MapPinned size={16} /> My places</Link>
                     <button onClick={logout}><LogOut size={16} /> Log out</button>
                   </div>
                 )}
@@ -194,6 +205,10 @@ export function Header() {
           <Link to="/messages" className="drawer-link">
             <MessageCircle size={18} /> Messages {unread > 0 && <span className="drawer-count">{unread}</span>}
           </Link>
+          <Link to="/inspections" className="drawer-link">
+            <CalendarDays size={18} /> Inspections {upcoming > 0 && <span className="drawer-count">{upcoming}</span>}
+          </Link>
+          <Link to="/places" className="drawer-link"><MapPinned size={18} /> My places</Link>
           <Link to="/my-ads" className="drawer-link"><User size={18} /> My adverts</Link>
           <p className="drawer-label">Tools</p>
           <Link to="/agents" className="drawer-link"><Award size={18} /> Trusted agents</Link>

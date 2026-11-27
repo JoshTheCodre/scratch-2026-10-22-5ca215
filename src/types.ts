@@ -105,6 +105,45 @@ export interface Listing {
   lat: number
   lng: number
   isUserAd?: boolean
+  /** When the owner takes inspections. Seed adverts derive this from their id. */
+  inspection?: Availability
+}
+
+/** Weekly inspection window: days are 0 (Sun) – 6 (Sat), hours in 24h. */
+export interface Availability {
+  days: number[]
+  from: number
+  to: number
+}
+
+export type PlaceLabel = 'Church' | 'Mosque' | 'Work' | 'School' | 'Family' | 'Gym' | 'Other'
+
+/** A place the user cares about, used for commute times. */
+export interface Place {
+  id: string
+  label: PlaceLabel
+  name: string
+  city: string
+  area?: string
+  lat: number
+  lng: number
+}
+
+export type BookingStatus = 'requested' | 'confirmed' | 'cancelled'
+
+export interface Booking {
+  id: string
+  listingId: string
+  sellerId: string
+  /** Local date, YYYY-MM-DD. */
+  date: string
+  /** Hour of day, 24h. */
+  hour: number
+  name: string
+  phone: string
+  note?: string
+  status: BookingStatus
+  createdAt: string
 }
 
 export interface User {

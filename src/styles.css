@@ -327,7 +327,7 @@ p {
   border-color: var(--line-strong);
 }
 .chip.on {
-  background: var(--ink);
+  background: var(--brand);
   border-color: var(--ink);
   color: #fff;
 }
@@ -520,7 +520,7 @@ p {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--ink);
+  background: var(--brand);
   color: #fff;
 }
 .top-actions {
@@ -1013,7 +1013,7 @@ p {
   border-color: var(--line-strong);
 }
 .tchip.on {
-  background: var(--ink);
+  background: var(--brand);
   border-color: var(--ink);
   color: #fff;
 }
@@ -1100,7 +1100,7 @@ p {
   transition: background 0.15s, color 0.15s;
 }
 .view-toggle button.on {
-  background: var(--ink);
+  background: var(--brand);
   color: #fff;
 }
 .pager {
@@ -1130,7 +1130,7 @@ p {
   background: var(--hover);
 }
 .pager button.on {
-  background: var(--ink);
+  background: var(--brand);
   color: #fff;
 }
 .pager button:disabled {
@@ -1216,7 +1216,7 @@ p {
   color: var(--ink);
 }
 .fcat.active {
-  background: var(--ink);
+  background: var(--brand);
   color: #fff;
   font-weight: 600;
 }
@@ -1333,7 +1333,7 @@ input[type='radio'] {
   border-color: var(--line-strong);
 }
 .pill.on {
-  background: var(--ink);
+  background: var(--brand);
   border-color: var(--ink);
   color: #fff;
 }
@@ -1587,7 +1587,7 @@ input.switch:checked::after {
   gap: 10px;
   padding: 12px 20px;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--brand);
   color: #fff;
   font-size: 14.5px;
   font-weight: 500;
@@ -2839,7 +2839,7 @@ input[type='range'] {
   transition: background 0.15s, color 0.15s;
 }
 .tabs button.on {
-  background: var(--ink);
+  background: var(--brand);
   color: #fff;
 }
 .tabs small {
@@ -4750,4 +4750,784 @@ input[type='range'] {
   margin: 0 0 0 0.16em;
   padding: 0.04em 0.24em 0.07em;
   letter-spacing: -0.035em;
+}
+
+/* ───────────────────────── Smart search, commute, compare, inspections ───────────────────────── */
+
+/* Hero: what the sentence was read as, or example searches. */
+.hero-understood,
+.hero-examples {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 14px 0 0;
+  font-size: 13.5px;
+  color: var(--on-dark-muted);
+}
+.hero-understood svg {
+  color: var(--pop-light);
+}
+.u-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 600;
+}
+.hero-examples span {
+  font-weight: 600;
+}
+.hero-examples button {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.hero-examples button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Listings: banners for a sentence search or a "similar to" search. */
+.search-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 4px 0 14px;
+  padding: 14px 14px 14px 16px;
+  border-radius: var(--radius);
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+}
+.search-banner > .icon-btn {
+  margin: -6px -6px 0 auto;
+  flex: none;
+}
+.nl-spark {
+  flex: none;
+  margin-top: 2px;
+  color: var(--brand);
+}
+.nl-body {
+  min-width: 0;
+  flex: 1;
+}
+.nl-body p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.nl-body p.small {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.nl-chips .achip {
+  background: var(--card);
+}
+.like-thumb {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--line);
+}
+.like-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.like-banner > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.like-title {
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sort-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 14px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.sort-note svg {
+  color: var(--brand);
+}
+
+/* Cards: travel time to the first saved place. */
+.commute-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  margin-top: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.commute-chip svg {
+  flex: none;
+}
+
+/* Detail: booked state in the side card. */
+.booked-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+  color: var(--brand);
+}
+.booked-card span {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.booked-card small {
+  color: var(--ink-2);
+}
+
+/* Detail: price comparison. */
+.compare .verdict.good {
+  color: #0b7a5c;
+}
+.compare .verdict.high {
+  color: var(--danger);
+}
+.compare .verdict.even {
+  color: var(--brand);
+}
+.range-bar {
+  position: relative;
+  height: 10px;
+  margin: 18px 6px 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(11, 122, 92, 0.25), var(--brand-100) 50%, rgba(214, 69, 69, 0.25));
+}
+.range-median {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 18px;
+  margin-left: -1px;
+  background: var(--slate);
+  border-radius: 2px;
+}
+.range-dot {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--brand);
+  box-shadow: 0 2px 6px rgba(11, 33, 72, 0.25);
+}
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.compare-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.compare-list li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+}
+.compare-list li:first-child {
+  border-top: 0;
+}
+.compare-list li.self {
+  background: var(--brand-50);
+}
+.compare-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.compare-who strong {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14.5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.compare-who small {
+  color: var(--muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.compare-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  flex: none;
+}
+.compare-price strong {
+  font-size: 14.5px;
+}
+.compare-price small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.compare-price .cheaper {
+  color: #0b7a5c;
+  font-weight: 600;
+}
+.compare-price .dearer {
+  color: var(--danger);
+}
+.compare-go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-right: -6px;
+  border-radius: 50%;
+  color: var(--muted);
+}
+.compare-go::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.compare-list li:hover .compare-go {
+  color: var(--brand);
+}
+.compare > p.muted.small {
+  margin-top: 10px;
+}
+
+/* Detail: commute to saved places. */
+.commute-empty {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-50);
+  color: var(--brand);
+}
+.commute-empty > svg {
+  flex: none;
+  margin-top: 2px;
+}
+.commute-empty strong {
+  color: var(--ink);
+}
+.commute-empty p {
+  margin: 4px 0 0;
+}
+.commute-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.commute-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.commute-list li:first-child {
+  border-top: 0;
+  padding-top: 2px;
+}
+.commute-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--brand);
+  color: #fff;
+}
+.commute-place {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.commute-place strong,
+.commute-place small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.commute-place small {
+  color: var(--muted);
+}
+.commute-times {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  flex: none;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.commute-times small {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.commute-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.commute-main small {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.commute-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 6px;
+}
+
+/* Booking modal. */
+.book {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.book-avail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-50);
+  color: var(--brand);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.book-avail svg {
+  flex: none;
+}
+.day-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  margin: 0 -2px;
+  scrollbar-width: thin;
+}
+.day {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 62px;
+  padding: 8px 0;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.day small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.day strong {
+  font-size: 18px;
+}
+.day .day-note {
+  font-size: 11.5px;
+}
+.day.on {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #fff;
+}
+.day.on small {
+  color: rgba(255, 255, 255, 0.85);
+}
+.day:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--bg-soft);
+}
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.slot small {
+  font-size: 11px;
+  font-weight: 500;
+}
+.slot.on {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #fff;
+}
+.slot:disabled {
+  opacity: 0.45;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.book-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-50);
+  color: var(--brand);
+}
+.book-summary > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.book-summary strong {
+  color: var(--ink);
+}
+.book-summary small {
+  color: var(--muted);
+}
+.book-safety {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.book-safety svg {
+  flex: none;
+  color: var(--brand);
+  margin-top: 1px;
+}
+
+/* My places and Inspections pages. */
+.page-head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.page-head-row .page-title {
+  margin-bottom: 4px;
+}
+.page-head-row p {
+  margin: 0;
+}
+.place-list,
+.booking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.place-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.place-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+.place-info small {
+  color: var(--muted);
+}
+.place-info .link-btn {
+  min-height: 0;
+  margin-top: 4px;
+  font-size: 13.5px;
+}
+.place-actions {
+  display: flex;
+  gap: 8px;
+}
+.list-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 26px 0 12px;
+  font-size: 18px;
+}
+.list-head .count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 12.5px;
+}
+.booking {
+  display: flex;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.booking.past {
+  opacity: 0.75;
+}
+.booking-thumb {
+  flex: none;
+  width: 112px;
+  height: 112px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--line);
+}
+.booking-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.booking-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+.booking-body > small {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.booking-when {
+  font-size: 16px;
+}
+.booking-title {
+  color: var(--ink-2);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.status-requested {
+  background: var(--pop-pale);
+  color: var(--base-deep);
+}
+.status-confirmed {
+  background: rgba(11, 122, 92, 0.12);
+  color: #0b7a5c;
+}
+.status-cancelled {
+  background: var(--bg-soft);
+  color: var(--muted);
+}
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.danger-text {
+  color: var(--danger) !important;
+}
+
+/* Detail: three-button bar on phones (call, chat, book). */
+@media (max-width: 1024px) {
+  .mobile-cta {
+    grid-template-columns: 48px 1fr 1.4fr;
+  }
+  .mobile-cta .btn {
+    padding-left: 10px;
+    padding-right: 10px;
+    white-space: nowrap;
+  }
+  .mobile-cta .icon-only {
+    padding: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .search-banner {
+    padding: 12px;
+  }
+  .booking-thumb {
+    width: 76px;
+    height: 76px;
+  }
+  .booking-actions .btn {
+    flex: 1 1 auto;
+  }
+  .page-head-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-examples button:nth-of-type(n + 3) {
+    display: none;
+  }
+  .compare-list li {
+    padding: 12px;
+    gap: 10px;
+  }
+}
+
+.close-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--pop-pale);
+  color: var(--base-deep);
+}
+.close-head > svg {
+  flex: none;
+  margin-top: 2px;
+}
+.close-head p {
+  margin: 2px 0 0;
+}
+
+/* Toasts: full-width lane on phones so long messages wrap into a tidy card. */
+.toasts {
+  left: 16px;
+  right: 16px;
+  transform: none;
+}
+.toast {
+  max-width: 520px;
+  border-radius: 16px;
+  line-height: 1.35;
+}
+.toast svg {
+  flex: none;
+}
+.commute-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+/* Modals: never let wide content (like the day strip) stretch the sheet past the screen. */
+.modal-backdrop {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+.modal,
+.modal-body,
+.book,
+.book .field {
+  min-width: 0;
+}
+.day-strip {
+  max-width: 100%;
+}
+.slot-grid,
+.day-strip {
+  width: 100%;
+  align-self: stretch;
+}
+@media (max-width: 720px) {
+  .booking-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+  .booking-actions .btn {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }

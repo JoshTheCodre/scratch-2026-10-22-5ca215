@@ -1,7 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { Listing, Thread, User } from '../types'
+import type { Booking, Listing, Place, Thread, User } from '../types'
 import { SEED_LISTINGS } from '../data/listings'
 import { RETIRED_CATEGORIES } from '../data/categories'
+import { sellerById } from '../data/sellers'
+import { bookingDateText } from './inspection'
 
 // Client-side store persisted to localStorage. Swap these actions for API calls later.
 
@@ -61,6 +63,12 @@ interface Store {
   addRecent: (id: string) => void
   toasts: Toast[]
   toast: (text: string, tone?: Toast['tone']) => void
+  places: Place[]
+  savePlace: (p: Place) => void
+  removePlace: (id: string) => void
+  bookings: Booking[]
+  bookInspection: (b: Omit<Booking, 'id' | 'status' | 'createdAt'>) => Booking
+  cancelBooking: (id: string) => void
 }
 
 // Ads saved before "New Builds" and "Commercial Property for Sale" were folded into
@@ -83,6 +91,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [myAds, setMyAds] = usePersisted<Listing[]>('myAds', [], migrateAds)
   const [threads, setThreads] = usePersisted<Thread[]>('threads', [])
   const [recent, setRecent] = usePersisted<string[]>('recent', [])
+  const [places, setPlaces] = usePersisted<Place[]>('places', [])
+  const [bookings, setBookings] = usePersisted<Booking[]>('bookings', [])
+  // Latest bookings for timers, so a confirmation never lands on a cancelled booking.
+  const bookingsRef = useRef(bookings)
+  bookingsRef.current = bookings
   const [toasts, setToasts] = useState<Toast[]>([])
   const toastId = useRef(0)
 
@@ -141,11 +154,62 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const markRead = useCallback((threadId: string) => setThreads((ts) => ts.map((t) => (t.id === threadId && t.unread ? { ...t, unread: 0 } : t))), [setThreads])
 
+  const savePlace = useCallback(
+    (p: Place) => setPlaces((ps) => (ps.some((x) => x.id === p.id) ? ps.map((x) => (x.id === p.id ? p : x)) : [...ps, p])),
+    [setPlaces],
+  )
+  const removePlace = useCallback((id: string) => setPlaces((ps) => ps.filter((x) => x.id !== id)), [setPlaces])
+
+  // Booking adds a note to the chat with the seller; the seller confirms a moment later.
+  const bookInspection = useCallback(
+    (input: Omit<Booking, 'id' | 'status' | 'createdAt'>) => {
+      const booking: Booking = { ...input, id: `b${Date.now().toString(36)}`, status: 'requested', createdAt: new Date().toISOString() }
+      const when = bookingDateText(booking, true)
+      setBookings((bs) => [
+        booking,
+        // Rescheduling replaces any earlier active booking for the same advert.
+        ...bs.map((b) => (b.listingId === input.listingId && b.status !== 'cancelled' ? { ...b, status: 'cancelled' as const } : b)),
+      ])
+      const at = new Date().toISOString()
+      const moving = bookings.some((b) => b.listingId === input.listingId && b.status !== 'cancelled')
+      const note = `${moving ? 'Hello, I need to move my inspection to' : 'Hello, I just booked an inspection for'} ${when}.${input.note ? ` ${input.note}` : ''}`
+      setThreads((ts) => {
+        const existing = ts.find((t) => t.listingId === input.listingId)
+        if (existing) return ts.map((t) => (t === existing ? { ...t, messages: [...t.messages, { from: 'me' as const, text: note, at }] } : t))
+        return [{ id: `t${Date.now().toString(36)}`, listingId: input.listingId, sellerId: input.sellerId, messages: [{ from: 'me' as const, text: note, at }], unread: 0 }, ...ts]
+      })
+      setTimeout(() => {
+        if (bookingsRef.current.find((b) => b.id === booking.id)?.status !== 'requested') return
+        setBookings((bs) => bs.map((b) => (b.id === booking.id && b.status === 'requested' ? { ...b, status: 'confirmed' } : b)))
+        const reply = `Confirmed! See you on ${when}. Please call me when you get to the street and I will direct you.`
+        setThreads((ts) =>
+          ts.map((t) => (t.listingId === input.listingId ? { ...t, unread: t.unread + 1, messages: [...t.messages, { from: 'them' as const, text: reply, at: new Date().toISOString() }] } : t)),
+        )
+        const seller = sellerById(input.sellerId)
+        toast(`${seller ? seller.name : 'The owner'} confirmed your inspection`)
+      }, 2500)
+      return booking
+    },
+    [bookings, setBookings, setThreads, toast],
+  )
+  // Cancelling tells the owner in the chat so they can offer the slot to someone else.
+  const cancelBooking = useCallback(
+    (id: string) => {
+      const b = bookings.find((x) => x.id === id)
+      setBookings((bs) => bs.map((x) => (x.id === id ? { ...x, status: 'cancelled' } : x)))
+      if (!b) return
+      const text = `Sorry, I have to cancel my inspection on ${bookingDateText(b, true)}. Thank you.`
+      setThreads((ts) => ts.map((t) => (t.listingId === b.listingId ? { ...t, messages: [...t.messages, { from: 'me' as const, text, at: new Date().toISOString() }] } : t)))
+    },
+    [bookings, setBookings, setThreads],
+  )
+
   const addRecent = useCallback((id: string) => setRecent((r) => [id, ...r.filter((x) => x !== id)].slice(0, 12)), [setRecent])
 
   const value: Store = {
     listings, byId, user, login, logout, saved, toggleSave, myAds, addAd, updateAd, removeAd,
     threads, openThread, sendMessage, markRead, recent, addRecent, toasts, toast,
+    places, savePlace, removePlace, bookings, bookInspection, cancelBooking,
   }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

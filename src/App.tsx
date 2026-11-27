@@ -15,6 +15,8 @@ import MyAds from './pages/MyAds'
 import Info from './pages/Info'
 import NotFound from './pages/NotFound'
 import States from './pages/States'
+import MyPlaces from './pages/MyPlaces'
+import Inspections from './pages/Inspections'
 
 export default function App() {
   return (
@@ -35,6 +37,8 @@ export default function App() {
           <Route path="/price-check" element={<PriceCheck />} />
           <Route path="/states" element={<States />} />
           <Route path="/my-ads" element={<MyAds />} />
+          <Route path="/places" element={<MyPlaces />} />
+          <Route path="/inspections" element={<Inspections />} />
           <Route path="/about" element={<Info kind="about" />} />
           <Route path="/safety" element={<Info kind="safety" />} />
           <Route path="/terms" element={<Info kind="terms" />} />

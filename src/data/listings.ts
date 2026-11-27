@@ -3,6 +3,7 @@ import { STATES, cityBySlug, stateOfCity } from './locations'
 import { POOLS } from './images'
 import { LAND_DOCUMENTS } from './categories'
 import { slugify } from '../lib/format'
+import { areaPoint } from '../lib/geo'
 
 // Deterministic demo inventory. Replace with an API call when a backend exists.
 
@@ -468,15 +469,16 @@ function makeListing(cat: GenKind, city: City, i: number, now: number): Listing 
         city: city.slug,
         area,
         address: d.category.startsWith('land') ? undefined : `${int(2, 48)} ${pick(city.slug === 'port-harcourt' ? STREETS : GENERIC_STREETS)}, ${area}`,
-        facilities: d.facilities ?? [],
+        facilities: [...new Set(d.facilities ?? [])],
         images: photos(kind, i),
         sellerId: sellerFor(cat, city.slug),
         postedAt: new Date(now - hoursAgo * 3600_000).toISOString(),
         views: int(12, 2400),
         tier,
         status: 'active',
-        lat: city.lat + between(-0.05, 0.05),
-        lng: city.lng + between(-0.05, 0.05),
+        // Near the area's centre (the two draws keep the random sequence unchanged).
+        lat: areaPoint(city.slug, area).lat + between(-0.05, 0.05) * 0.08,
+        lng: areaPoint(city.slug, area).lng + between(-0.05, 0.05) * 0.08,
       }
 }
 
