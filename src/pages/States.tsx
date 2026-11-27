@@ -32,7 +32,7 @@ export default function States() {
 
   return (
     <div className="container page-simple">
-      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'All states' }]} />
+      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'All states' }]} />
       <div className="page-intro">
         <MapPin size={32} />
         <div>

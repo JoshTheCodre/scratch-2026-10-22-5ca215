@@ -20,7 +20,7 @@ export default function Inspections() {
   const past = rows.filter((r) => !upcoming.includes(r))
   return (
     <div className="container page-simple">
-      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'Inspections' }]} />
+      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'Inspections' }]} />
       <h1 className="page-title">Inspections</h1>
       <p className="muted">Viewings you have booked. Owners confirm in the chat, and you can reschedule any time.</p>
       {rows.length === 0 ? (

@@ -13,7 +13,7 @@ export default function MyPlaces() {
   const [editing, setEditing] = useState<Place | 'new' | null>(null)
   return (
     <div className="container page-simple">
-      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'My places' }]} />
+      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'My places' }]} />
       <div className="page-head-row">
         <div>
           <h1 className="page-title">My places</h1>

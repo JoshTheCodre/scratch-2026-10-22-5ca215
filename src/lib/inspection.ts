@@ -108,15 +108,15 @@ export function bookingIcs(b: Booking, l: Listing, where: string) {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//House Deela//Inspections//EN',
+    'PRODID:-//House4Rent//Inspections//EN',
     'BEGIN:VEVENT',
-    `UID:${b.id}@housedeela`,
+    `UID:${b.id}@house4rent.ng`,
     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`,
     `DTSTART:${stamp(b.hour)}`,
     `DTEND:${stamp(b.hour + 1)}`,
     `SUMMARY:${esc(`Inspection: ${l.title}`)}`,
     `LOCATION:${esc(where)}`,
-    `DESCRIPTION:${esc('Booked on House Deela. Never pay before you inspect.')}`,
+    `DESCRIPTION:${esc('Booked on House4Rent. Never pay before you inspect.')}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ].join('\r\n')

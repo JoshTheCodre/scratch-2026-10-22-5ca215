@@ -31,7 +31,7 @@ export default function SellerProfile() {
 
   return (
     <div className="container page-seller">
-      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'Trusted agents', to: '/agents' }, { label: seller.name }]} />
+      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'Trusted agents', to: '/agents' }, { label: seller.name }]} />
       <section className="card seller-hero">
         <Avatar name={seller.name} color={seller.color} size={88} />
         <div className="seller-hero-info">
@@ -122,7 +122,7 @@ export default function SellerProfile() {
           <p>{seller.bio}</p>
           <ul className="about-list">
             <li>
-              <ShieldCheck size={16} /> {seller.verified ? 'Identity and business details verified by House Deela' : 'Identity not yet verified — take extra care'}
+              <ShieldCheck size={16} /> {seller.verified ? 'Identity and business details verified by House4Rent.ng' : 'Identity not yet verified — take extra care'}
             </li>
             <li>
               <Calendar size={16} /> Member since {seller.joinedYear}

@@ -250,9 +250,9 @@ export function ScrollToTop() {
 
 export function Logo() {
   return (
-    <Link to="/" className="logo" aria-label="House Deela home">
+    <Link to="/" className="logo" aria-label="House4Rent.ng home">
       <span className="logo-word">
-        House<b>Deela</b>
+        House<b>4</b>Rent<span className="logo-tld">.ng</span>
       </span>
     </Link>
   )

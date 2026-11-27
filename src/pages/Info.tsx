@@ -5,7 +5,7 @@ import { Breadcrumbs, SAFETY_TIPS } from '../components/ui'
 type Kind = 'about' | 'safety' | 'terms' | 'privacy'
 
 const TITLES: Record<Kind, string> = {
-  about: 'About House Deela',
+  about: 'About House4Rent.ng',
   safety: 'Safety tips',
   terms: 'Terms & conditions',
   privacy: 'Privacy policy',
@@ -15,13 +15,13 @@ const TITLES: Record<Kind, string> = {
 export default function Info({ kind }: { kind: Kind }) {
   return (
     <div className="container page-simple narrow">
-      <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: TITLES[kind] }]} />
+      <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: TITLES[kind] }]} />
       <article className="card prose">
         <h1>{TITLES[kind]}</h1>
         {kind === 'about' && (
           <>
             <p>
-              House Deela is a marketplace only for property: homes and apartments to rent or buy, land and plots, short lets, new builds, commercial buildings and event
+              House4Rent.ng is a marketplace only for property: homes and apartments to rent or buy, land and plots, short lets, new builds, commercial buildings and event
               spaces. Owners, agents and developers post adverts; renters, buyers and investors contact them directly.
             </p>
             <p>We focus on clear prices, verified sellers and honest photos so you spend less on wasted inspections.</p>

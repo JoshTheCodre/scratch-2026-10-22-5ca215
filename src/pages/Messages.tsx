@@ -41,7 +41,7 @@ export default function Messages() {
   if (threads.length === 0)
     return (
       <div className="container page-simple">
-        <Breadcrumbs items={[{ label: 'House Deela', to: '/' }, { label: 'Messages' }]} />
+        <Breadcrumbs items={[{ label: 'House4Rent', to: '/' }, { label: 'Messages' }]} />
         <h1 className="page-title">Messages</h1>
         <EmptyState
           icon={MessageCircle}
